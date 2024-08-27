@@ -1,11 +1,27 @@
 {
     "line.clr.has_term": [
-        "Fore.CYAN",
-        "Fore.GREEN"
+        {
+            "comment": "line number",
+            "foreground": "blue",
+            "background": "reset"
+        },
+        {
+            "comment": "actual line",
+            "foreground": "green",
+            "background": "reset"
+        }
     ],
     "line.clr.no_term": [
-        "Fore.BLUE",
-        "Fore.RED"
+        {
+            "comment": "line number",
+            "foreground": "blue",
+            "background": "reset"
+        },
+        {
+            "comment": "actual line",
+            "foreground": "red",
+            "background": "reset"
+        }
     ],
 	"default.include_filename": false,
 	"default.context": 0,
