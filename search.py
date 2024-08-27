@@ -114,7 +114,7 @@ def main():
                 listarg[index] += arg[i]
         listarg = list(filter(None, listarg))
         global formatted_args
-        formatted_args = ["<term>", False, False, 0, "*"]
+        formatted_args = ["<term>", config("read","default.in_cwd"), config("read", "default.include_filename"), config("read","default.context"), "*"]
         for i in range(len(listarg)):
             is_flag = False
             if i == 0:
