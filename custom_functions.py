@@ -75,6 +75,9 @@ def config(readorwrite, key, changeto=""):
     elif readorwrite == "write":
         cnfg[key] = changeto
         dump_json("search.config.json",cnfg)
+if config("read","default.context") < 0:
+    print(f"{Fore.RED}RangeError: `default.context` in search.config.json is less than 0.")
+    exit()
 
 def replace_unicode(match):
     return chr(int(match.group(0)[2:], 16))
