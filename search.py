@@ -1,9 +1,11 @@
 import os
 import sys
 #import time
-from colorama import Fore, Style, init
+from colorama import Fore, Style, init, Back
 import re
 from custom_functions import *
+
+search_dir = os.getcwd()
 
 # Initialize colorama
 init(autoreset=True)
@@ -67,17 +69,17 @@ def search_in_file(file_path, term):
                     if line_number - 1 == i:
                         # When line has term
                         line_marker = ">"
-                        clrs = [Fore.CYAN, Fore.GREEN]
+                        clrs = [[config("read","clr.has_term.line_number.foreground"),config("read","clr.has_term.line_number.background")], [config("read","clr.has_term.line.foreground"),config("read","clr.has_term.line.background")]]
                     else:
                         # When line doesn't have the term
                         line_marker = " "
-                        clrs = [Fore.BLUE, Fore.RED]
+                        clrs = [[config("read","clr.no_term.line_number.foreground"),config("read","clr.no_term.line_number.background")], [config("read","clr.no_term.line.foreground"),config("read","clr.no_term.line.background")]]
                     if (term in lines[i] and i+1 < line_number) or i+1 in printed_line_numbers:
                         pass
                     elif line_number < i+1 and term in lines[i]:
                         break
                     else:
-                        print(f"{clrs[0]}{line_marker} {i+1}{Fore.WHITE}\t: {clrs[1]}{lines[i][:-1]}")
+                        print(f"{clrs[0][0]}{clrs[0][1]}{line_marker} {i+1}{Fore.WHITE}\t: {clrs[1][0]}{clrs[0][1]}{lines[i][:-1]}{reset()}")
                         printed_line_numbers.append(i+1)
 
 def main():

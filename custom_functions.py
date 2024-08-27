@@ -4,7 +4,7 @@ import pip
 from pip import main
 import time
 import traceback
-from colorama import Fore, Style, init
+from colorama import Fore, Style, init, Back
 from shutil import get_terminal_size as t_size
 import re
 
@@ -34,8 +34,8 @@ def load_json(path):
         try:
             return loads(file.read())
         except JSONDecodeError:
-            clrprint(f"\n{path} got a JSON Decode Error", clr="red")
-            clrprint(traceback.format_exc(), clr="yellow")
+            print(f"\n{Fore.RED}{path} got a JSON Decode Error")
+            print(f"{Fore.YELLOW}{traceback.format_exc()}")
             exit()
 
 
@@ -61,14 +61,15 @@ def is_binary(file_path):
     except:
         return True
 
-clrs_colorama = {"Fore.RED": Fore.RED, }
-def config(readorwrite, key, changeto):
-    cnfg = load_json("search.config.json")
+
+def config(readorwrite, key, changeto=""):
+    cnfg = load_json(f"{os.path.dirname(os.path.realpath(__file__))}/search.config.json")
     if readorwrite == "read":
-        if "line.clr" in key:
-            if cnfg[key] is list:
-                for i in range(len(cnfg)):
-                    pass
+        if "clr" in key:
+            if "foreground" in key:
+                return Fore.__dict__[cnfg[key].upper()]
+            elif "background" in key:
+                return Back.__dict__[cnfg[key].upper()]
         else:
             return cnfg[key]
     elif readorwrite == "write":
@@ -77,3 +78,6 @@ def config(readorwrite, key, changeto):
 
 def replace_unicode(match):
     return chr(int(match.group(0)[2:], 16))
+
+def reset():
+    return f"{Fore.RESET}{Back.RESET}{Style.RESET_ALL}" 

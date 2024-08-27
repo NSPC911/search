@@ -1,28 +1,16 @@
 {
-    "line.clr.has_term": [
-        {
-            "comment": "line number",
-            "foreground": "blue",
-            "background": "reset"
-        },
-        {
-            "comment": "actual line",
-            "foreground": "green",
-            "background": "reset"
-        }
-    ],
-    "line.clr.no_term": [
-        {
-            "comment": "line number",
-            "foreground": "blue",
-            "background": "reset"
-        },
-        {
-            "comment": "actual line",
-            "foreground": "red",
-            "background": "reset"
-        }
-    ],
+    "clr.has_term.line_number.foreground": "blue",
+    "clr.has_term.line_number.background": "reset",
+    
+    "clr.has_term.line.foreground": "green",
+    "clr.has_term.line.background": "reset",
+    
+    "clr.no_term.line_number.foreground": "blue",
+    "clr.no_term.line_number.background": "reset",
+    
+    "clr.no_term.line.foreground": "red",
+    "clr.no_term.line.background": "reset",
+
 	"default.include_filename": false,
 	"default.context": 0,
 	"default.in_cwd": false
