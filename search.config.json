@@ -1,0 +1,13 @@
+{
+    "line.clr.has_term": [
+        "Fore.CYAN",
+        "Fore.GREEN"
+    ],
+    "line.clr.no_term": [
+        "Fore.BLUE",
+        "Fore.RED"
+    ],
+	"default.include_filename": false,
+	"default.context": 0,
+	"default.in_cwd": false
+}
