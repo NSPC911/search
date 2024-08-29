@@ -33,8 +33,9 @@ def load_json(path):
     with open(path, "r") as file:
         try:
             return loads(file.read())
-        except JSONDecodeError:
-            print(f"\n{Fore.RED}{path} got a JSON Decode Error")
+        except JSON5DecodeError:
+            print(f"\n{Fore.RED}{path} got a JSON5 Decode Error!")
+            print(f"Redownload from https://github.com/NSPC911/scripts/blob/main/search.config.json if you can't fix it!")
             print(f"{Fore.YELLOW}{traceback.format_exc()}")
             exit()
 
@@ -62,14 +63,11 @@ def is_binary(file_path):
         return True
 
 
-def config(readorwrite, key, changeto=""):
+def config(readorwrite, key, changeto="", is_theme=False):
     cnfg = load_json(f"{os.path.dirname(os.path.realpath(__file__))}/search.config.json")
     if readorwrite == "read":
-        if "clr" in key:
-            if "foreground" in key:
-                return Fore.__dict__[cnfg[key].upper()]
-            elif "background" in key:
-                return Back.__dict__[cnfg[key].upper()]
+        if is_theme:
+            return f"{Fore.__dict__[cnfg[f'{key}.foreground'].upper()]}{Back.__dict__[cnfg[f'{key}.background'].upper()]}{Style.__dict__[cnfg[f'{key}.style'].upper()]}"
         else:
             return cnfg[key]
     elif readorwrite == "write":

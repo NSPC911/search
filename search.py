@@ -78,18 +78,18 @@ def search_in_file(file_path, term):
                     if line_number - 1 == i:
                         # When line has term
                         line_marker = ">"
-                        clrs = [[config("read","clr.has_term.line_number.foreground"),config("read","clr.has_term.line_number.background")], [config("read","clr.has_term.line.foreground"),config("read","clr.has_term.line.background")]]
+                        clrs = [config("read","clr.has_term.line_number",is_theme=True), config("read","clr.has_term.line",is_theme=True)]
                     else:
                         # When line doesn't have the term
                         line_marker = " "
-                        clrs = [[config("read","clr.no_term.line_number.foreground"),config("read","clr.no_term.line_number.background")], [config("read","clr.no_term.line.foreground"),config("read","clr.no_term.line.background")]]
+                        clrs = [config("read","clr.no_term.line_number",is_theme=True), config("read","clr.no_term.line",is_theme=True)]
                     if (term in lines[i] and i+1 < line_number) or i+1 in printed_line_numbers:
                         pass
                     elif line_number < i+1 and term in lines[i]:
                         # So it doesn't reprint the next line when it finds it
                         break
                     else:
-                        print(f"{clrs[0][0]}{clrs[0][1]}{line_marker} {i+1}{Fore.WHITE}\t: {clrs[1][0]}{clrs[0][1]}{lines[i][:-1]}{reset()}")
+                        print(f"{clrs[0]}{line_marker} {i+1}{Fore.WHITE}\t: {clrs[1]}{lines[i][:-1]}{reset()}")
                         printed_line_numbers.append(i+1)
 
 def main():
@@ -177,7 +177,6 @@ def main():
                 was_flag = False
             else:
                 formatted_args[0] += listarg[i].strip()
-                print(formatted_args[0])
         
         # Help thing
         if listarg[0] == "ECHO is on." or "--help" in arg:
@@ -198,11 +197,11 @@ def main():
         
         if formatted_args[1] == True:
             # Searches in Current Working Directory
-            print(f"{Fore.WHITE}Searching for {Fore.BLUE}{listarg[0]} {Fore.WHITE}in {Fore.YELLOW}{os.getcwd()}")
+            print(f"{Fore.WHITE}Searching for {Fore.BLUE}{formatted_args[0]} {Fore.WHITE}in {Fore.YELLOW}{os.getcwd()}")
             search_in_cwd(formatted_args[0])
         else:
             # Searches in the directory recursively
-            print(f"{Fore.WHITE}Searching for {Fore.BLUE}{listarg[0]}")
+            print(f"{Fore.WHITE}Searching for {Fore.BLUE}{formatted_args[0]}")
             search_dir(os.getcwd(), formatted_args[0])
         
         if not found:
