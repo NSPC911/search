@@ -96,7 +96,7 @@ def search_in_file(file_path, term):
 
 def main():
     try:
-        arg = sys.stdin.read().strip()
+        arg = " ".join(sys.argv[1:]).strip()
 
         # Unicode thing (yes it supports unicode)
         unicode_regex = r'\\u[0-9a-fA-F]{4}'
