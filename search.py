@@ -1,7 +1,6 @@
 import os
 import sys
-#import time
-from colorama import Fore, Style, init, Back
+from colorama import Fore, Style, Back, init
 import re
 from custom_functions import *
 
@@ -15,7 +14,7 @@ def found_smth():
     found = True
 
 def search_dir(directory, term):
-    for root, dirs, files in os.walk(directory):
+    for root, _, files in os.walk(directory):
         for file in files:
             file_path = os.path.join(root, file)
             clear_line()
@@ -24,9 +23,11 @@ def search_dir(directory, term):
             if not is_binary(file_path):
                 search_in_file(file_path, term)
             elif formatted_args[2] and term in str(relative_file_path):
+                # Does this if not binary
+                # Yes, there is a seperate code in 
+                # search_in_file() but eh
                 clear_line("-", "\n")
                 print(f"\r{Fore.WHITE}Found {Fore.YELLOW}{term} {Fore.WHITE}in {Fore.GREEN}{os.path.relpath(file_path, start=os.getcwd())}")
-                samefile = True
                 found_smth()
 
 def search_in_cwd(term):
@@ -44,20 +45,28 @@ def search_in_cwd(term):
 
 def search_in_file(file_path, term):
     if file_path.split(os.path.sep)[-1] != formatted_args[4] and formatted_args[4] != "*":
+        # If file name doesn't match
         return
+    # More vars!!
     samefile = False
     last_printed_line = -1
     printed_line_numbers = []
     if formatted_args[2] and term in str(file_path):
+        # If file name has term
         clear_line("-", "\n")
         print(f"\r{Fore.WHITE}Found {Fore.YELLOW}{term} {Fore.WHITE}in {Fore.GREEN}{os.path.relpath(file_path, start=os.getcwd())}")
         samefile = True
         found_smth()
+    
     with open(file_path, 'r', errors='ignore') as f:
         lines = f.readlines()
+    
     for line_number, line in enumerate(lines, start=1):
         if term in line:
             if not samefile:
+                # Seperates files
+                # Probably should make one for hunks
+                # because line numbers can jump
                 clear_line("-", "\n")
                 print(f"\r{Fore.WHITE}Found {Fore.YELLOW}{term} {Fore.WHITE}in {Fore.GREEN}{os.path.relpath(file_path, start=os.getcwd())}")
                 samefile = True
@@ -77,6 +86,7 @@ def search_in_file(file_path, term):
                     if (term in lines[i] and i+1 < line_number) or i+1 in printed_line_numbers:
                         pass
                     elif line_number < i+1 and term in lines[i]:
+                        # So it doesn't reprint the next line when it finds it
                         break
                     else:
                         print(f"{clrs[0][0]}{clrs[0][1]}{line_marker} {i+1}{Fore.WHITE}\t: {clrs[1][0]}{clrs[0][1]}{lines[i][:-1]}{reset()}")
@@ -85,22 +95,31 @@ def search_in_file(file_path, term):
 def main():
     try:
         arg = sys.stdin.read().strip()
-        listarg = [""]
-        index = 0
-        wait_until = -1
-        is_flag = False 
+
+        # Unicode thing (yes it supports unicode)
         unicode_regex = r'\\u[0-9a-fA-F]{4}'
         notunicode_regex = r'\\u(?![0-9a-fA-F]{4})'
         if re.search(notunicode_regex, arg):
             print(f"{Fore.RED}ValueError: Invalid Unicode Escape sequence found. Please fix it before trying again.")
             exit(1)
         arg = re.sub(unicode_regex, replace_unicode, arg)
+
+        # More vars, I love vars
+        listarg = [""]
+        index = 0
+        is_flag = False
+        was_flag = False
+
+        # Separates the arguments
+        # Could have used .split() but it doesn't work with spaces in between quotes
+        # And I am extra bored :)
         for i in range (len(arg)):
             if is_flag and arg[i] == " ":
                 is_flag = False
                 if listarg[index] != "":
                     index += 1
                     listarg.append("")
+                was_flag = True
             elif arg[i] == "-" and not is_flag:
                 is_flag = True
                 index += 1
@@ -110,28 +129,29 @@ def main():
                 listarg.append("")
             elif arg[i+1:i+3] == "--" and arg[i] == " ":
                 pass
+            elif was_flag and arg[i] == " ": 
+                was_flag = False
+                index += 1
+                listarg.append("")
             else:
                 listarg[index] += arg[i]
         listarg = list(filter(None, listarg))
+
+        # Makes the arguments more readable
         global formatted_args
-        formatted_args = ["<term>", config("read","default.in_cwd"), config("read", "default.include_filename"), config("read","default.context"), "*"]
+        formatted_args = ["", config("read","default.in_cwd"), config("read", "default.include_filename"), config("read","default.context"), "*"]
+        was_flag = False
         for i in range(len(listarg)):
-            is_flag = False
-            if i == 0:
-                formatted_args[0] = listarg[0].strip()
             if listarg[i] == "--in-cwd":
-                is_flag = True
                 formatted_args[1] = True
-            if listarg[i] == "--include-filename":
-                is_flag = True
+            elif listarg[i] == "--include-filename":
                 formatted_args[2] = True
-            if listarg[i] == "--help":
-                is_flag = True
-            if listarg[i] == "--context":
-                is_flag = True
+            elif listarg[i] == "--help":
+                pass
+            elif listarg[i] == "--context":
                 try:
                     if int(listarg[i+1]) < 0:
-                        raise OverflowError
+                        raise OverflowError # Honestly unsure why I chose overflow error
                     else:
                         formatted_args[3] = int(listarg[i+1])
                 except IndexError:
@@ -143,16 +163,23 @@ def main():
                 except OverflowError:
                     print(f"{Fore.RED}RangeError: `{listarg[i+1]}` is smaller than 0")
                     exit(1)
-            if listarg[i] == "--file-name":
-                is_flag = True
+                was_flag = True
+            elif listarg[i] == "--file-name":
                 try:
                     formatted_args[4] = listarg[i+1]
                 except IndexError:
                     print(f"{Fore.RED}FlagError: Expected more after `--file-name` but received None")
                     exit(1)
-            if not is_flag and listarg[i][:2] == "--":
+                was_flag = True
+            elif listarg[i][:2] == "--":
                 print(f"{Fore.YELLOW}Skipping unknown flag {Fore.BLUE}{listarg[i]}")
+            elif was_flag:
+                was_flag = False
+            else:
+                formatted_args[0] += listarg[i].strip()
+                print(formatted_args[0])
         
+        # Help thing
         if listarg[0] == "ECHO is on." or "--help" in arg:
             print(f"\n{Fore.WHITE}Usage: search <term> [--in-file <file>] [--in-cwd] [--include-filename] [--context <int>]")
             print(f"{Fore.GREEN}Tool to search for a given term in a directory/file and return its line number.")
@@ -164,19 +191,20 @@ def main():
             print(f"{Fore.RED}--file-name\t\t:{Fore.WHITE} Searches only in the specified file name.")
             exit(0)
         
+        # Prints another message if not found
         global found
         found = False
         print()
         
         if formatted_args[1] == True:
+            # Searches in Current Working Directory
             print(f"{Fore.WHITE}Searching for {Fore.BLUE}{listarg[0]} {Fore.WHITE}in {Fore.YELLOW}{os.getcwd()}")
-        else:
-            print(f"{Fore.WHITE}Searching for {Fore.BLUE}{listarg[0]}")
-        
-        if formatted_args[1] == True:
             search_in_cwd(formatted_args[0])
         else:
+            # Searches in the directory recursively
+            print(f"{Fore.WHITE}Searching for {Fore.BLUE}{listarg[0]}")
             search_dir(os.getcwd(), formatted_args[0])
+        
         if not found:
             clear_line()
             print(f"\n{Fore.YELLOW}Couldn't find {Fore.BLUE}{formatted_args[0]}")
@@ -184,6 +212,7 @@ def main():
             clear_line("-")
             print()
     except KeyboardInterrupt:
+        # Hate the error, pareses it nicely
         pass
 
 if __name__ == "__main__":
