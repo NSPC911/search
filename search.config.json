@@ -1,22 +1,18 @@
 {
-
     "clr.has_term.line_number.foreground": "blue",
     "clr.has_term.line_number.background": "reset",
     "clr.has_term.line_number.style": "normal",
-
     "clr.has_term.line.foreground": "green",
     "clr.has_term.line.background": "reset",
     "clr.has_term.line.style": "normal",
-
     "clr.no_term.line_number.foreground": "cyan",
     "clr.no_term.line_number.background": "reset",
     "clr.no_term.line_number.style": "dim",
-
     "clr.no_term.line.foreground": "red",
     "clr.no_term.line.background": "reset",
     "clr.no_term.line.style": "dim",
-
-	"default.include_filename": false,
-	"default.context": 0,
-	"default.in_cwd": false
+    "default.include_filename": false,
+    "default.context": 0,
+    "default.in_cwd": false,
+    "first_run": false
 }

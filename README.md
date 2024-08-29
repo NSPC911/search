@@ -10,3 +10,5 @@ Coming Soon™ onto [Scoop](https://scoop.sh)
 Add the folder to environment path before attempting to search for items
 
 Compatible on most systems (I believe so, have not tested.)
+
+Config is yet to be configable through search itself and requires changing the json file itself.

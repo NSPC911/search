@@ -4,9 +4,10 @@ from colorama import Fore, Style, Back, init
 import re
 from custom_functions import *
 
-if os.path.isfile(f'{os.path.realpath(__file__)}/firstrun'):
-    print("Thanks for using this script! Run `search --help` for more info.")
-    os.remove(f'{os.path.realpath(__file__)}/firstrun')
+if config("read","first_run"):
+    print("\nThanks for using this script! Run `search --help` for more info.")
+    config("write","first_run",False)
+    exit(0)
 
 # Initialize colorama
 init(autoreset=True)

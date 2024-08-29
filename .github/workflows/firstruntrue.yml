@@ -1,0 +1,27 @@
+name: Update First Run in Config
+
+on:
+  push:
+
+jobs:
+  update-first-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check if first_run is false
+        run: |
+          sed -i 's/"first_run": false/"first_run": true/g' search.config.json
+          if git diff --exit-code search.config.json; then
+            echo "No changes needed in search.config.json"
+          else
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions@github.com"
+            git add search.config.json
+            git commit -m "Update first_run to true"
+            git push
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

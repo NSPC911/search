@@ -25,15 +25,15 @@ def check(module, module_name=""):
         time.sleep(1)
 
 
-check("json5", "json-five")
-from json5 import *
+check("ujson")
+from ujson import *
 
 # Simple function to load json from file
 def load_json(path):
     with open(path, "r") as file:
         try:
             return loads(file.read())
-        except JSON5DecodeError:
+        except JSONDecodeError:
             print(f"\n{Fore.RED}{path} got a JSON5 Decode Error!")
             print(f"Redownload from https://github.com/NSPC911/scripts/blob/main/search.config.json if you can't fix it!")
             print(f"{Fore.YELLOW}{traceback.format_exc()}")
@@ -42,7 +42,7 @@ def load_json(path):
 
 # Simple function to save json into file
 def dump_json(path, dictionary):
-    the_json = dumps(dictionary, indent=2)
+    the_json = dumps(dictionary, indent=4)
     the_json = the_json.replace(r"\/","/")
     with open(path, "w") as file:
         file.write(the_json)
