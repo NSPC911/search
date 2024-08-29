@@ -14,5 +14,5 @@
     "default.include_filename": false,
     "default.context": 0,
     "default.in_cwd": false,
-    "first_run": false
+    "first_run": true
 }
