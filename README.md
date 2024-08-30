@@ -1,4 +1,6 @@
 # search
+<sub><a href="https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/find">Find</a> is slow, so I made my own</sub>
+
 Multi-functional CLI script that allows you to search for a term in a directory.
 
 ```sh
