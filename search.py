@@ -3,11 +3,7 @@ import sys
 from colorama import Fore, Style, Back, init
 import re
 from custom_functions import *
-
-if config("read","first_run"):
-    print("\nThanks for using this script! Run `search --help` for more info.")
-    config("write","first_run",False)
-    exit(0)
+from config import *
 
 # Initialize colorama
 init(autoreset=True)
@@ -98,7 +94,7 @@ def search_in_file(file_path, term):
 def main():
     try:
         arg = " ".join(sys.argv[1:]).strip()
-
+        print()
         # Unicode thing (yes it supports unicode)
         unicode_regex = r'\\u[0-9a-fA-F]{4}'
         notunicode_regex = r'\\u(?![0-9a-fA-F]{4})'
@@ -145,7 +141,10 @@ def main():
         formatted_args = ["", config("read","default.in_cwd"), config("read", "default.include_filename"), config("read","default.context"), "*"]
         was_flag = False
         for i in range(len(listarg)):
-            if listarg[i] == "--in-cwd":
+            if listarg[i] == "--config":
+                configure(listarg)
+                exit(0)
+            elif listarg[i] == "--in-cwd":
                 formatted_args[1] = True
             elif listarg[i] == "--include-filename":
                 formatted_args[2] = True
@@ -182,23 +181,34 @@ def main():
                 formatted_args[0] += listarg[i].strip()
         
         # Help thing
-        if listarg[0] == "ECHO is on." or "--help" in arg:
-            print(f"\n{Fore.WHITE}Usage: search <term> [--in-file <file>] [--in-cwd] [--include-filename] [--context <int>]")
-            print(f"{Fore.GREEN}Tool to search for a given term in a directory/file and return its line number.")
-            print(f"{Fore.YELLOW}Always searches in current directory recursively unless specified{Fore.RESET}.")
-            print(f"{Fore.BLUE}<term>\t\t\t:{Fore.WHITE} Term you want to search for.{Fore.YELLOW} (required)")
-            print(f"{Fore.RED}--in-cwd\t\t:{Fore.WHITE} Search without entering into sub-directories.")
-            print(f"{Fore.RED}--include-filename\t:{Fore.WHITE} Search includes file names.")
-            print(f"{Fore.RED}--context\t\t:{Fore.WHITE} Shows more lines based on your integer.")
-            print(f"{Fore.RED}--file-name\t\t:{Fore.WHITE} Searches only in the specified file name.")
-            exit(0)
+        try:
+            if listarg[0] == "ECHO is on." or "--help" in arg:
+                print(f"{Fore.WHITE}Usage: search <term> [--in-cwd] [--include-filename] [--context <int>] [--file-name <file>] [--config [set <key> <value>]/[read <key>]/[list]]")
+                print(f"{Fore.GREEN}Tool to search for a given term in a directory/file and return its line number.")
+                print(f"{Fore.YELLOW}Always searches in current directory recursively unless specified{Fore.RESET}.")
+                print(f"{Fore.BLUE}<term>\t\t\t:{Fore.WHITE} Term you want to search for.{Fore.YELLOW} (required)")
+                print(f"{Fore.RED}--in-cwd\t\t:{Fore.WHITE} Search without entering into sub-directories.")
+                print(f"{Fore.RED}--include-filename\t:{Fore.WHITE} Search includes file names.")
+                print(f"{Fore.RED}--context\t\t:{Fore.WHITE} Shows more lines based on your integer.")
+                print(f"{Fore.RED}--file-name\t\t:{Fore.WHITE} Searches only in the specified file name.")
+                print(f"{Fore.RED}--config\t\t:{Fore.WHITE} Set or read a config value.")
+                print(f"    {Fore.YELLOW}set <key> <value>\t:{Fore.WHITE} Set a value to a key.")
+                print(f"    {Fore.YELLOW}read <key>\t\t:{Fore.WHITE} Read a value from a key along with a list of allowed definitions.")
+                print(f"    {Fore.YELLOW}list\t\t:{Fore.WHITE} List all the keys and values.")
+                exit(0)
+        except IndexError:
+            print("Run 'search --help' for more info!")
+            exit(1)
         
         # Prints another message if not found
         global found
         found = False
-        print()
         
-        if formatted_args[1] == True:
+        # Why do you enable so much random flags :sob:
+        if formatted_args[1] and formatted_args[2] and formatted_args[4] != "*" and config("read","easter_errors"):
+            print(f"{Fore.RED}EasterError: {Fore.YELLOW}Huh? Your choice of flags is weird.\n")
+        
+        if formatted_args[1]:
             # Searches in Current Working Directory
             print(f"{Fore.WHITE}Searching for {Fore.BLUE}{formatted_args[0]} {Fore.WHITE}in {Fore.YELLOW}{os.getcwd()}")
             search_in_cwd(formatted_args[0])

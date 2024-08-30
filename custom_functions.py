@@ -4,10 +4,10 @@ import pip
 from pip import main
 import time
 import traceback
-from colorama import Fore, Style, init, Back
+from colorama import Fore, init
 from shutil import get_terminal_size as t_size
-import re
 
+init(autoreset=True)
 # If I need a module that isn't installed
 def check(module, module_name=""):
     try:
@@ -62,23 +62,5 @@ def is_binary(file_path):
     except:
         return True
 
-
-def config(readorwrite, key, changeto="", is_theme=False):
-    cnfg = load_json(f"{os.path.dirname(os.path.realpath(__file__))}/search.config.json")
-    if readorwrite == "read":
-        if is_theme:
-            return f"{Fore.__dict__[cnfg[f'{key}.foreground'].upper()]}{Back.__dict__[cnfg[f'{key}.background'].upper()]}{Style.__dict__[cnfg[f'{key}.style'].upper()]}"
-        else:
-            return cnfg[key]
-    elif readorwrite == "write":
-        cnfg[key] = changeto
-        dump_json("search.config.json",cnfg)
-if config("read","default.context") < 0:
-    print(f"{Fore.RED}RangeError: `default.context` in search.config.json is less than 0.")
-    exit()
-
 def replace_unicode(match):
     return chr(int(match.group(0)[2:], 16))
-
-def reset():
-    return f"{Fore.RESET}{Back.RESET}{Style.RESET_ALL}" 
