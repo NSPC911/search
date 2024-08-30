@@ -49,11 +49,6 @@ if config("read","default.context") < 0:
     print(f"{Fore.RED}RangeError: `default.context` in search.config.json is less than 0.")
     exit(0)
 
-if config("read","first_run"):
-    print("\nThanks for using this script! Run `search --help` for more info.")
-    config("write","first_run",False)
-    exit(0)
-
 def configure(listarg):
     try:
         listarg[1]
