@@ -7,7 +7,8 @@ import traceback
 from colorama import Fore, init
 from shutil import get_terminal_size as t_size
 
-init(autoreset=True)
+init(strip=False, convert=False, autoreset=True)
+
 # If I need a module that isn't installed
 def check(module, module_name=""):
     try:

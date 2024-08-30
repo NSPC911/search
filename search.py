@@ -6,7 +6,7 @@ from custom_functions import *
 from config import *
 
 # Initialize colorama
-init(autoreset=True)
+init(strip=False, convert=False, autoreset=True)
 
 def found_smth():
     global found

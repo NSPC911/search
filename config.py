@@ -2,8 +2,9 @@ from colorama import Fore, Style, init, Back
 import os
 from custom_functions import *
 
+init(strip=False, convert=False, autoreset=True)
+
 config_path = f"{os.path.dirname(os.path.realpath(__file__))}/search.config.json"
-init(autoreset=True)
 def config(readorwrite, key, changeto="", is_theme=False):
     cnfg = load_json(config_path) # Will be changeable
     if readorwrite == "read":
