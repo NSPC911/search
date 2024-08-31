@@ -9,6 +9,11 @@ url = "https://raw.githubusercontent.com/NSPC911/search/main/search.config.json"
 init(strip=False, convert=False, autoreset=True)
 
 config_path = f"{os.path.dirname(os.path.realpath(__file__))}{os.path.sep}search.config.json"
+if f"scoop{os.path.sep}apps" in config_path:
+    if not os.path.exists(f"{os.path.expanduser("~")}{os.path.sep}scoop{os.path.sep}persist{os.path.sep}search.config.json"):
+        copyfile(config_path,f"{os.path.expanduser('~')}{os.path.sep}scoop{os.path.sep}persist{os.path.sep}search.config.json")
+    config_path = f"{os.path.expanduser('~')}{os.path.sep}scoop{os.path.sep}persist{os.path.sep}search.config.json"
+
 def config(readorwrite, key, changeto="", is_theme=False):
     cnfg = load_json(config_path) # Will be changeable
     if readorwrite == "read":
@@ -61,7 +66,7 @@ def configure(listarg):
         print(f"{Fore.RED}FlagError: Expected modifier keyword after `--config` but received None")
         exit(1)
     try:
-        if listarg[2] in ["reset","update"]:
+        if listarg[2] in ["reset","update","where"]:
             raise IndexError
     except IndexError:
         if listarg[1] == "update":
@@ -89,6 +94,8 @@ def configure(listarg):
             print(f"{Fore.GREEN}Listing all keys in search.config.json:")
             for key in load_json(config_path):
                 print(f"{Fore.CYAN}{key}{Fore.WHITE} is set as {Fore.MAGENTA}{config('read',key)}")
+        elif listarg[1] == "where":
+            print(f"{Fore.GREEN}search.config.json is located at {Fore.CYAN}{config_path}")
         else:
             print(f"{Fore.RED}FlagError: Expected key to `{listarg[1]}` but received None")
             exit(1)
@@ -124,10 +131,3 @@ def configure(listarg):
         else:
             print(f"{Fore.RED}FlagError: Expected `list`, `read`, `write`, `update` or `reset` after `--config` but received {listarg[1]}")
             exit(1)
-
-if f"scoop{os.path.sep}apps" in config_path:
-    if not os.path.exists(f"{os.path.expanduser("~")}{os.path.sep}persist{os.path.sep}search.config.json"):
-        copyfile(config_path,f"{os.path.expanduser('~')}{os.path.sep}persist{os.path.sep}search.config.json")
-        config_path = f"{os.path.expanduser('~')}{os.path.sep}persist{os.path.sep}search.config.json"
-    
-    
