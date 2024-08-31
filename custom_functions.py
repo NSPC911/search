@@ -28,6 +28,7 @@ def check(module, module_name=""):
 
 check("ujson")
 from ujson import *
+check("requests")
 
 # Simple function to load json from file
 def load_json(path):

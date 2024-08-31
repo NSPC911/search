@@ -183,7 +183,7 @@ def main():
         # Help thing
         try:
             if listarg[0] == "ECHO is on." or "--help" in arg:
-                print(f"{Fore.WHITE}Usage: search <term> [--in-cwd] [--include-filename] [--context <int>] [--file-name <file>] [--config [set <key> <value>]/[read <key>]/[list]]")
+                print(f"{Fore.WHITE}Usage: search <term> [--in-cwd] [--include-filename] [--context <int>] [--file-name <file>] [--config <modifier> <key> <value>]")
                 print(f"{Fore.GREEN}Tool to search for a given term in a directory/file and return its line number.")
                 print(f"{Fore.YELLOW}Always searches in current directory recursively unless specified{Fore.RESET}.")
                 print(f"{Fore.BLUE}<term>\t\t\t:{Fore.WHITE} Term you want to search for.{Fore.YELLOW} (required)")
@@ -195,6 +195,8 @@ def main():
                 print(f"    {Fore.YELLOW}set <key> <value>\t:{Fore.WHITE} Set a value to a key.")
                 print(f"    {Fore.YELLOW}read <key>\t\t:{Fore.WHITE} Read a value from a key along with a list of allowed definitions.")
                 print(f"    {Fore.YELLOW}list\t\t:{Fore.WHITE} List all the keys and values.")
+                print(f"    {Fore.YELLOW}update\t\t:{Fore.WHITE} Merges remote config with local config.")
+                print(f"    {Fore.YELLOW}reset\t\t:{Fore.WHITE} Reset the config file to default.")
                 exit(0)
         except IndexError:
             print("Run 'search --help' for more info!")

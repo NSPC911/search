@@ -1,10 +1,14 @@
 from colorama import Fore, Style, init, Back
 import os
 from custom_functions import *
+from shutil import copyfile
+import requests
+
+url = "https://raw.githubusercontent.com/NSPC911/search/main/search.config.json"
 
 init(strip=False, convert=False, autoreset=True)
 
-config_path = f"{os.path.dirname(os.path.realpath(__file__))}/search.config.json"
+config_path = f"{os.path.dirname(os.path.realpath(__file__))}{os.path.sep}search.config.json"
 def config(readorwrite, key, changeto="", is_theme=False):
     cnfg = load_json(config_path) # Will be changeable
     if readorwrite == "read":
@@ -59,7 +63,28 @@ def configure(listarg):
     try:
         listarg[2]
     except IndexError:
-        if listarg[1] != "list":
+        if listarg[1] == "update":
+            response = requests.get(url)
+            if response.status_code == 200:
+                remote_config = response.json()
+                current_config = load_json(config_path)
+                new_config = {**remote_config, **current_config}
+                dump_json(config_path,new_config)
+                print(f"{Fore.GREEN}Updated search.config.json from `{Fore.BLUE}{url}{Fore.GREEN}`")
+            else:
+                print(f"{Fore.RED}RequestError: Couldn't fetch data from {url}")
+                exit(1)
+            return
+        elif listarg[1] == "reset":
+            response = requests.get(url)
+            if response.status_code == 200:
+                dump_json(config_path,response.json())
+                print(f"{Fore.GREEN}Reset search.config.json to default from `{Fore.BLUE}{url}{Fore.GREEN}`")
+            else:
+                print(f"{Fore.RED}RequestError: Couldn't fetch data from {url}")
+                exit(1)
+            return
+        elif listarg[1] != "list":
             print(f"{Fore.RED}FlagError: Expected key to `{listarg[1]}` but received None")
             exit(1)
     try:
@@ -100,3 +125,10 @@ def configure(listarg):
         else:
             print(f"{Fore.RED}FlagError: Expected `list`, `read` or `write` after `--config` but received {listarg[1]}")
             exit(1)
+
+if f"scoop{os.path.sep}apps" in config_path:
+    if not os.path.exists(f"{os.path.expanduser("~")}{os.path.sep}persist{os.path.sep}search.config.json"):
+        copyfile(config_path,f"{os.path.expanduser('~')}{os.path.sep}persist{os.path.sep}search.config.json")
+        config_path = f"{os.path.expanduser('~')}{os.path.sep}persist{os.path.sep}search.config.json"
+    
+    
