@@ -1,8 +1,7 @@
+import os, requests
 from colorama import Fore, Style, init, Back
-import os
 from custom_functions import *
 from shutil import copyfile
-import requests
 
 url = "https://raw.githubusercontent.com/NSPC911/search/main/search.config.json"
 

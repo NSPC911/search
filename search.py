@@ -1,9 +1,7 @@
-import os
-import sys
+import os, sys, re
 from custom_functions import *
 from config import *
 from colorama import Fore, Style, Back, init
-import re
 
 # Initialize colorama
 init(strip=False, convert=False, autoreset=True)

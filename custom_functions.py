@@ -1,7 +1,5 @@
-import importlib
-import pip
-import time
-import traceback
+import os, importlib, time, traceback, pip, sys
+from subprocess import run
 from shutil import get_terminal_size as t_size
 
 # If I need a module that isn't installed
@@ -10,14 +8,18 @@ def check(module, module_name=""):
         importlib.import_module(module)
     except ModuleNotFoundError:
         print(f"{module} is not installed!")
-        if module_name == "":
+        with open(os.devnull, "w") as devnull:
+            sys.stderr = devnull
+            if module_name == "":
             # Using pip instead of subprocess as calling
             # with terminal results in an error
-            pip.main(["install", module])
-        else:
-            # Using pip instead of subprocess as calling
-            # with terminal results in an error
-            pip.main(["install", module_name])
+                run([sys.executable, "-m", "pip", "install", module, "--quiet"], check=True)
+                #pip.main(["install", module, "--quiet"])
+            else:
+                run([sys.executable, "-m", "pip", "install", module_name, "--quiet"], check=True)
+                #pip.main(["install", module_name, "--quiet"])
+        sys.stderr = sys.__stderr__
+        print(f"Installed {module}!")
         time.sleep(1)
 
 
@@ -34,7 +36,7 @@ def load_json(path):
         try:
             return loads(file.read())
         except JSONDecodeError:
-            print(f"\n{Fore.RED}{path} got a JSON5 Decode Error!")
+            print(f"\n{Fore.RED}{path} got a JSON Decode Error!")
             print(f"Redownload from https://github.com/NSPC911/scripts/blob/main/search.config.json if you can't fix it!")
             print(f"{Fore.YELLOW}{traceback.format_exc()}")
             exit()
