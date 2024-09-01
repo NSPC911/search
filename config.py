@@ -1,12 +1,11 @@
 import os, requests
-from colorama import Fore, Style, init, Back
+from colorama import Fore, Style, init, Back # type: ignore
 from custom_functions import *
 from shutil import copyfile
 
-url = "https://raw.githubusercontent.com/NSPC911/search/main/search.config.json"
-
 init(strip=False, convert=False, autoreset=True)
 
+config_remote_url = "https://raw.githubusercontent.com/NSPC911/search/main/search.config.json"
 config_path = f"{os.path.dirname(os.path.realpath(__file__))}{os.path.sep}search.config.json"
 if f"scoop{os.path.sep}apps" in config_path:
     if not os.path.exists(f"{os.path.expanduser("~")}{os.path.sep}scoop{os.path.sep}persist{os.path.sep}search.config.json"):
@@ -68,25 +67,14 @@ def configure(listarg):
         if listarg[2] in ["reset","update","where"]:
             raise IndexError
     except IndexError:
-        if listarg[1] == "update":
-            response = requests.get(url)
-            if response.status_code == 200:
-                remote_config = response.json()
-                current_config = load_json(config_path)
-                new_config = {**remote_config, **current_config}
-                dump_json(config_path,new_config)
-                print(f"{Fore.GREEN}Updated search.config.json from `{Fore.BLUE}{url}{Fore.GREEN}`")
-            else:
-                print(f"{Fore.RED}RequestError: Couldn't fetch data from {url}")
-                exit(1)
-            return
-        elif listarg[1] == "reset":
-            response = requests.get(url)
+        if listarg[1] == "reset":
+            response = requests.get(config_remote_url)
             if response.status_code == 200:
                 dump_json(config_path,response.json())
-                print(f"{Fore.GREEN}Reset search.config.json to default from `{Fore.BLUE}{url}{Fore.GREEN}`")
+                print(f"{Fore.GREEN}Reset search.config.json to default from remote")
             else:
-                print(f"{Fore.RED}RequestError: Couldn't fetch data from {url}")
+                print(f"{Fore.RED}RequestError: Couldn't fetch data from remote for {Fore.YELLOW}config.json")
+                print(f"{Fore.RED}Please check your internet connection and try again.")
                 exit(1)
             return
         elif listarg[1] == "list":

@@ -1,4 +1,4 @@
-import os, importlib, time, traceback, pip, sys
+import os, importlib, time, traceback, sys
 from subprocess import run
 from shutil import get_terminal_size as t_size
 
@@ -27,7 +27,7 @@ check("ujson")
 from ujson import *
 check("requests")
 check("colorama")
-from colorama import Fore, init
+from colorama import Fore, init # type: ignore
 init(strip=False, convert=False, autoreset=True)
 
 # Simple function to load json from file
