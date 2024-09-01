@@ -1,13 +1,8 @@
-import os
 import importlib
 import pip
-from pip import main
 import time
 import traceback
-from colorama import Fore, init
 from shutil import get_terminal_size as t_size
-
-init(strip=False, convert=False, autoreset=True)
 
 # If I need a module that isn't installed
 def check(module, module_name=""):
@@ -29,6 +24,9 @@ def check(module, module_name=""):
 check("ujson")
 from ujson import *
 check("requests")
+check("colorama")
+from colorama import Fore, init
+init(strip=False, convert=False, autoreset=True)
 
 # Simple function to load json from file
 def load_json(path):
