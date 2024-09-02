@@ -1,0 +1,23 @@
+name: Pre-Releases
+
+on:
+  push:
+
+jobs:
+  update-first-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run Archive Creator script
+        run: |
+          python archive_creator.py
+      
+      - name: Upload as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: archives/
+          if-no-files-found: warn
+          compression-level: 9

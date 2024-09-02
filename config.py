@@ -1,9 +1,15 @@
-import os, requests
-from colorama import Fore, Style, init, Back # type: ignore
 from custom_functions import *
+import os
+from colorama import Fore, Style, init, Back
 from shutil import copyfile
-
 init(strip=False, convert=False, autoreset=True)
+
+# I'm not sure why reqests takes the longest time to import
+try:
+    from requests import get
+except ModuleNotFoundError:
+    install("requests")
+    from requests import get
 
 config_remote_url = "https://raw.githubusercontent.com/NSPC911/search/main/search.config.json"
 config_path = f"{os.path.dirname(os.path.realpath(__file__))}{os.path.sep}search.config.json"
@@ -13,7 +19,7 @@ if f"scoop{os.path.sep}apps" in config_path:
     config_path = f"{os.path.expanduser('~')}{os.path.sep}scoop{os.path.sep}persist{os.path.sep}search.config.json"
 
 def config(readorwrite, key, changeto="", is_theme=False):
-    cnfg = load_json(config_path) # Will be changeable
+    cnfg = load_json(config_path)
     if readorwrite == "read":
         if is_theme:
             # Invalid Foreground Color
@@ -68,7 +74,7 @@ def configure(listarg):
             raise IndexError
     except IndexError:
         if listarg[1] == "reset":
-            response = requests.get(config_remote_url)
+            response = get(config_remote_url)
             if response.status_code == 200:
                 dump_json(config_path,response.json())
                 print(f"{Fore.GREEN}Reset search.config.json to default from remote")
