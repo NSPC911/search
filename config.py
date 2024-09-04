@@ -18,9 +18,9 @@ if f"scoop{os.path.sep}apps" in config_path:
         copyfile(config_path,f"{os.path.expanduser('~')}{os.path.sep}scoop{os.path.sep}persist{os.path.sep}search.config.json")
     config_path = f"{os.path.expanduser('~')}{os.path.sep}scoop{os.path.sep}persist{os.path.sep}search.config.json"
 
-def config(readorwrite, key, changeto="", is_theme=False):
+def config(readorset, key, changeto="", is_theme=False):
     cnfg = load_json(config_path)
-    if readorwrite == "read":
+    if readorset == "read":
         if is_theme:
             # Invalid Foreground Color
             try:
@@ -50,7 +50,7 @@ def config(readorwrite, key, changeto="", is_theme=False):
             except KeyError:
                 print(f"{Fore.RED}KeyError: `{key}` not found in search.config.json")
                 exit(1)
-    elif readorwrite == "write":
+    elif readorset == "set":
         cnfg[key] = changeto
         dump_json("search.config.json",cnfg)
         print(f"{Fore.GREEN}Set `{Fore.CYAN}{key}{Fore.GREEN}` to {Fore.MAGENTA}{changeto}")
@@ -97,14 +97,14 @@ def configure(listarg):
         listarg.extend(last)
         if listarg[0] == "set":
             if listarg[2].lower() == "true":
-                config("write",listarg[1],True)
+                config("set",listarg[1],True)
             elif listarg[2].lower() == "false":
-                config("write",listarg[1],False)
+                config("set",listarg[1],False)
             else:
                 if listarg[2].isnumeric():
-                    config("write",listarg[1],int(listarg[2]))
+                    config("set",listarg[1],int(listarg[2]))
                 else:
-                    config("write",listarg[1],listarg[2].lower())
+                    config("set",listarg[1],listarg[2].lower())
         elif listarg[0] == "read":
             print(f"`{Fore.CYAN}{listarg[1]}{Fore.WHITE}` is set as {Fore.MAGENTA}{config('read',listarg[1])}")
             if listarg[1].startswith("clr") and listarg[1].endswith("foreground"):
@@ -117,10 +117,13 @@ def configure(listarg):
                 print(f"Allowed definitions: {Fore.GREEN}True, {Fore.RED}False")
             elif listarg[1] == "default.context":
                 print(f"Allowed definitions: Any integer above 0")
+        else:
+            print(f"{Fore.RED}FlagError: Expected {Fore.YELLOW}`list`{Fore.RED}, {Fore.YELLOW}`read`{Fore.RED}, {Fore.YELLOW}`set`{Fore.RED} or {Fore.YELLOW}`reset`{Fore.RED} after {Fore.YELLOW}`--config`{Fore.RED} but received {Fore.YELLOW}{listarg[0]}{Fore.RED}")
+            exit(1)
     except IndexError:
         if listarg[0] == "set":
             print(f"{Fore.RED}FlagError: Expected value to set to `{listarg[1]}` but received None")
             exit(1)
         else:
-            print(f"{Fore.RED}FlagError: Expected `list`, `read`, `write`, `update` or `reset` after `--config` but received {listarg[0]}")
+            print(f"{Fore.RED}FlagError: Expected {Fore.YELLOW}`list`{Fore.RED}, {Fore.YELLOW}`read`{Fore.RED}, {Fore.YELLOW}`set`{Fore.RED} or {Fore.YELLOW}`reset`{Fore.RED} after {Fore.YELLOW}`--config`{Fore.RED} but received {Fore.YELLOW}{listarg[0]}{Fore.RED}")
             exit(1)
