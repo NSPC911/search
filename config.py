@@ -52,8 +52,8 @@ def config(readorset, key, changeto="", is_theme=False):
                 exit(1)
     elif readorset == "set":
         try:
-            if cnfg[key]:
-                cnfg[key] = changeto
+            cnfg[key] # Check whether exists
+            cnfg[key] = changeto
             dump_json("search.config.json",cnfg)
             print(f"{Fore.GREEN}Set `{Fore.CYAN}{key}{Fore.GREEN}` to {Fore.MAGENTA}{changeto}")
         except KeyError:
