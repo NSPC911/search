@@ -91,6 +91,8 @@ def configure(listarg):
         elif listarg[0] == "list":
             print(f"{Fore.GREEN}Listing all keys in search.config.json:")
             for key in load_json(config_path):
+                if key.startswith("comment"):
+                    continue # Ya don't need to see comments
                 print(f"{Fore.CYAN}{key}{Fore.WHITE} is set as {Fore.MAGENTA}{config('read',key)}")
             exit(0)
         elif listarg[0] == "where":
@@ -102,9 +104,9 @@ def configure(listarg):
         last = listarg.pop().split()
         listarg.extend(last)
         if listarg[0] == "set":
-            if listarg[2].lower() in ["true","false"] and listarg[1] in ["default.include_filename","default.in_cwd","default.case_sensitive"]:
+            if listarg[2].lower() in ["true","false"] and listarg[1] in ["default.include_filename","default.in_cwd","default.case_sensitive","updater.canary"]:
                 config("set",listarg[1],listarg[2].lower()=="true")
-            elif listarg[1] in ["default.include_filename","default.in_cwd","default.case_sensitive"]:
+            elif listarg[1] in ["default.include_filename","default.in_cwd","default.case_sensitive", "updater.config"]:
                 print(f"Allowed definitions: {Fore.GREEN}True, {Fore.RED}False")
                 exit(1)
             elif listarg[1] == "default.context" and listarg[2].isnumeric():
@@ -125,8 +127,8 @@ def configure(listarg):
             elif listarg[1].startswith("clr") and listarg[1].endswith("style"):
                 print(f"Allowed definitions: {Style.BRIGHT}BRIGHT, {Style.NORMAL}NORMAL, {Style.DIM}DIM, {Style.RESET_ALL}RESET_ALL")
                 exit(1)
-            elif listarg[1] == "current_version":
-                print(f"{Fore.RED}ConfigError: Cannot change `current_version` in search.config.json")
+            elif "env" in listarg[1]:
+                print(f"{Fore.RED}ConfigError: Cannot change env variables in search.config.json")
                 exit(1)
             else:
                 if listarg[2].isnumeric():
@@ -141,7 +143,7 @@ def configure(listarg):
                 print(f"Allowed definitions:\n{Back.RED}red, {Back.GREEN}green, {Back.YELLOW}yellow, {Back.BLUE}blue, {Back.MAGENTA}magenta, {Back.CYAN}cyan, {Back.WHITE}white, {Back.BLACK}black\n{Back.LIGHTBLACK_EX}lightblack_ex, {Back.LIGHTBLUE_EX}lightblue_ex, {Back.LIGHTCYAN_EX}lightcyan_ex, {Back.LIGHTGREEN_EX}lightgreen_ex\n{Back.LIGHTMAGENTA_EX}lightmagenta_ex, {Back.LIGHTRED_EX}lightred_ex, {Back.LIGHTWHITE_EX}lightwhite_ex, {Back.LIGHTYELLOW_EX}lightyellow_ex{reset()}\nYou cannot see some colors as your terminal's background color is set that way.\n\nThe green color stretching from lightyellow_ex seems to be a bug that I can't fix.\nIf you find a fix, please make a PR.")
             elif listarg[1].startswith("clr") and listarg[1].endswith("style"):
                 print(f"Allowed definitions: {Style.BRIGHT}BRIGHT, {Style.NORMAL}NORMAL, {Style.DIM}DIM, {Style.RESET_ALL}RESET_ALL")
-            elif listarg[1] in ["default.include_filename","default.in_cwd","default.case_sensitive"]:
+            elif listarg[1] in ["default.include_filename","default.in_cwd","default.case_sensitive","updater.canary"]:
                 print(f"Allowed definitions: {Fore.GREEN}True, {Fore.RED}False")
             elif listarg[1] == "default.context":
                 print(f"Allowed definitions: Any integer above 0")

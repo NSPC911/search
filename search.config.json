@@ -15,5 +15,9 @@
   "default.context": 0,
   "default.in_cwd": false,
   "default.case_sensitive": false,
-  "current_version": "1.0.2"
+  "updater.env.current_version": "1.0.1",
+  "updater.env.canary_version": "1.0.2.8",
+  "updater.canary": false,
+  "comment.vars_below_arent": "implemented_yet",
+  "search.auto_update": false
 }

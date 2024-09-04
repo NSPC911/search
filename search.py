@@ -131,7 +131,35 @@ def main():
         if response.status_code == 200:
             remote_config = response.json()
             current_config = load_json(config_path)
+            # Update Checker
+            if current_config("updater.canary") and remote_config("updater.env.canary_version") != current_config("updater.env.canary_version"):
+                print(f"{Fore.GREEN}New canary version found!")
+                ghapi_response = requests.get("https://api.github.com/repos/NSPC911/search/commits")
+                if ghapi_response.status_code == 200:
+                    print(f"Latest commit:\n{Fore.CYAN}{ghapi_response.json()[0]['commit']['message']}")
+                should_update = ""
+                while not (should_update.lower().startswith("y") or should_update.lower().startswith("n")):
+                    should_update = input(f"Update from v{current_config('updater.env.current_version')} to v{remote_config('updater.env.current_version')}? [Y/n] ")
+                if should_update.lower().startswith("n"):
+                    print(f"{Fore.RED}Update cancelled!")
+                    exit
+            elif remote_config("updater.env.current_version") != current_config("updater.env.current_version"):
+                print(f"{Fore.GREEN}New stable version found")
+                print(f"{Fore.YELLOW}Release notes: https://github.com/NSPC911/search/releases/tag/v{remote_config('updater.env.current_version')}")
+                should_update = ""
+                while not (should_update.lower().startswith("y") or should_update.lower().startswith("n")):
+                    should_update = input(f"Update from v{current_config('updater.env.current_version')} to v{remote_config('updater.env.current_version')}? [Y/n] ")
+                if should_update.lower().startswith("n"):
+                    print(f"{Fore.RED}Update cancelled!")
+                    exit
+            elif remote_config("updater.env.current_version") == current_config("updater.env.current_version"):
+                print(f"{Fore.GREEN}Stable version up-to-date!")
+                exit
+            print(f"{Fore.YELLOW}Updating...\n")
             new_config = {**remote_config, **current_config}
+            if current_config("updater.canary"):
+                new_config["updater.env.canary_version"] = remote_config("updater.env.canary_version")
+            new_config["updater.env.current_version"] = remote_config("updater.env.current_version")
             dump_json(config_path,new_config)
             print(f"{Fore.GREEN}Updated search.config.json from remote!")
         else:
