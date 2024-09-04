@@ -86,8 +86,14 @@ def main():
     print()
     parser = argparse.ArgumentParser(description=f"Find.exe but {Fore.CYAN}better{Fore.RESET}")
     parser.add_argument("term", nargs="?", help="Term to search for")
-    parser.add_argument("--in-cwd", action="store_true", default=config("read","default.in_cwd"), help=f"Search {Fore.YELLOW}only{Fore.RESET} in the current directory")
-    parser.add_argument("--include-filename", action="store_true", default=config("read","default.include_filename"), help=f"{Fore.YELLOW}Include file names{Fore.RESET} in the search")
+    if config("read","default.in_cwd"):
+        parser.add_argument("--recursive", action="store_false", default=True, help=f"Search {Fore.YELLOW}in sub-directories{Fore.RESET}")
+    else:
+        parser.add_argument("--in-cwd", action="store_true", default=False, help=f"Search {Fore.YELLOW}only{Fore.RESET} in the current directory")
+    if config("read","default.include_filename"):
+        parser.add_argument("--exclude-filename", action="store_false", default=True, help=f"{Fore.YELLOW}Exclude file names{Fore.RESET} from the search")
+    else:
+        parser.add_argument("--include-filename", action="store_true", default=False, help=f"{Fore.YELLOW}Include file names{Fore.RESET} in the search")
     parser.add_argument("--context", type=int, default=config("read","default.context"), help=f"Number of {Fore.YELLOW}context lines{Fore.RESET} to show")
     parser.add_argument("--file-name", default="*", help=f"Search only in the {Fore.YELLOW}specified file name{Fore.RESET}")
     if config("read","default.case_sensitive"):
@@ -100,10 +106,17 @@ def main():
     global args
     args = parser.parse_args()
     try:
+        args.in_cwd = not args.recursive
+    except AttributeError:
+        pass
+    try:
         args.case_sensitive = not args.case_insensitive
     except AttributeError:
         pass
-    
+    try:
+        args.include_filename = not args.exclude_filename
+    except AttributeError:
+        pass
     if len(sys.argv) == 1:
         parser.print_help()
         return
