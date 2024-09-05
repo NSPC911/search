@@ -1,8 +1,23 @@
-import os, sys
+import os, sys, argparse, threading
 from custom_functions import *
+
+req_import_string = threading.Event()
+# I'm not sure why reqests takes the longest time to import
+# So I'm gonna create a new thread for it
+def import_request():
+    global requests
+    try:
+        import requests
+    except ModuleNotFoundError:
+        install("requests")
+        import requests
+    req_import_string.set()
+
+string = threading.Thread(target=import_request)
+string.start()
+
 from config import *
-from colorama import Fore, init # type: ignore
-import requests, argparse
+from colorama import Fore, init
 
 # Initialize colorama
 init(strip=False, convert=False, autoreset=True)
@@ -216,6 +231,7 @@ def main():
     print()
 
 if __name__ == "__main__":
+    req_import_string.wait()
     try:
         main()
     except KeyboardInterrupt:
