@@ -2,8 +2,7 @@ import os, sys
 from custom_functions import *
 from config import *
 from colorama import Fore, init # type: ignore
-import requests
-import argparse
+import requests, argparse
 
 # Initialize colorama
 init(strip=False, convert=False, autoreset=True)
@@ -41,7 +40,7 @@ def search_in_cwd(term, case_sensitive):
 
 def search_in_file(file_path, term, case_sensitive):
     if file_path.split(os.path.sep)[-1] != args.file_name and args.file_name != "*":
-        exit(0)
+        return
 
     if term in str(file_path) and args.include_filename:
         clear_line("-", "\n")
