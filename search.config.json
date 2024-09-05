@@ -17,8 +17,7 @@
     "default.in_cwd": true,
     "default.case_sensitive": false,
     "updater.env.current_version": "1.0.3",
-    "updater.env.canary_version": "1.0.4.2",
     "updater.canary": false,
-    "comment.vars_below_arent": "implemented_yet",
-    "search.auto_update": false
+    "updater.env.canary_version": "1.0.4.3",
+    "updater.auto_update": false
 }
