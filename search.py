@@ -47,6 +47,9 @@ def search_in_file(file_path, term, case_sensitive):
         print(f"\r{Fore.WHITE}Found {Fore.YELLOW}{term} {Fore.WHITE}in {Fore.GREEN}{os.path.relpath(file_path, start=os.getcwd())}")
         found_smth()
     
+    if not args.search_content:
+        return
+    
     samefile = False
     last_printed_line = -1
     printed_line_numbers = []
@@ -85,35 +88,47 @@ def main():
     print()
     parser = argparse.ArgumentParser(description=f"Find.exe but {Fore.CYAN}better{Fore.RESET}")
     parser.add_argument("term", nargs="?", help="Term to search for")
-    if config("read","default.in_cwd"):
-        parser.add_argument("--recursive", action="store_false", default=True, help=f"Search {Fore.YELLOW}in sub-directories{Fore.RESET}")
+    if config("read","default.search_content"):
+        parser.add_argument("--no-search-content", "-nsc", action="store_true", default=False, help=f"{Fore.YELLOW}Exclude file content{Fore.RESET} from the search")
     else:
-        parser.add_argument("--in-cwd", action="store_true", default=False, help=f"Search {Fore.YELLOW}only{Fore.RESET} in the current directory")
+        parser.add_argument("--search-content", "-sc", action="store_true", default=False, help=f"{Fore.YELLOW}Include file content{Fore.RESET} in the search")
     if config("read","default.include_filename"):
-        parser.add_argument("--exclude-filename", action="store_false", default=True, help=f"{Fore.YELLOW}Exclude file names{Fore.RESET} from the search")
+        parser.add_argument("--exclude-filename", "-nf", action="store_true", default=False, help=f"{Fore.YELLOW}Exclude file names{Fore.RESET} from the search")
     else:
-        parser.add_argument("--include-filename", action="store_true", default=False, help=f"{Fore.YELLOW}Include file names{Fore.RESET} in the search")
-    parser.add_argument("--context", type=int, default=config("read","default.context"), help=f"Number of {Fore.YELLOW}context lines{Fore.RESET} to show")
-    parser.add_argument("--file-name", default="*", help=f"Search only in the {Fore.YELLOW}specified file name{Fore.RESET}")
+        parser.add_argument("--include-filename", "-f", action="store_true", default=False, help=f"{Fore.YELLOW}Include file names{Fore.RESET} in the search")
+    if config("read","default.in_cwd"):
+        parser.add_argument("--recursive", "-r", action="store_true", default=False, help=f"Search {Fore.YELLOW}in sub-directories{Fore.RESET}")
+    else:
+        parser.add_argument("--in-cwd", "-nr", action="store_true", default=False, help=f"Search {Fore.YELLOW}only{Fore.RESET} in the current directory")
+    parser.add_argument("--context", "-c", type=int, default=config("read","default.context"), help=f"Number of {Fore.YELLOW}context lines{Fore.RESET} to show")
+    parser.add_argument("--file-name", "-fn", default="*", help=f"Search only in the {Fore.YELLOW}specified file name{Fore.RESET}")
     if config("read","default.case_sensitive"):
-        parser.add_argument("--case-insensitive", action="store_false", default=True, help=f"Disable case-sensitive searching")
+        parser.add_argument("--case-insensitive", "-ncs", action="store_true", default=False, help=f"Disable case-sensitive searching")
     else:
-        parser.add_argument("--case-sensitive", action="store_true", default=False, help=f"Enable case-sensitive searching")
+        parser.add_argument("--case-sensitive", "-cs", action="store_true", default=False, help=f"Enable case-sensitive searching")
     parser.add_argument("--config", nargs=argparse.REMAINDER, metavar=('modifier', 'key', 'value'), help="Configure settings: modifier key value")
-    parser.add_argument("--update", action="store_true", help="Update files from remote")
+    parser.add_argument("--update", "-u", action="store_true", help="Update files from remote")
 
     global args
     args = parser.parse_args()
     try:
+        args.include_filename = not args.exclude_filename
+        delattr(args, "exclude_filename")
+    except AttributeError:
+        pass
+    try:
+        args.search_content = not args.no_search_content
+        delattr(args, "no_search_content")
+    except AttributeError:
+        pass
+    try:
         args.in_cwd = not args.recursive
+        delattr(args, "recursive")
     except AttributeError:
         pass
     try:
         args.case_sensitive = not args.case_insensitive
-    except AttributeError:
-        pass
-    try:
-        args.include_filename = not args.exclude_filename
+        delattr(args, "case_insensitive")
     except AttributeError:
         pass
     if len(sys.argv) == 1:
@@ -180,9 +195,12 @@ def main():
         print(f"{Fore.GREEN}Updated all scripts from remote!")
         exit(0)
 
+    delattr(args, "config")
+    delattr(args, "update")
     global found
     found = False
 
+    print(args)
     if args.in_cwd:
         print(f"{Fore.WHITE}Searching for {Fore.BLUE}{args.term} {Fore.WHITE}in {Fore.YELLOW}{os.getcwd()}")
         search_in_cwd(args.term, args.case_sensitive)
