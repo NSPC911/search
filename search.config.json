@@ -5,6 +5,9 @@
     "clr.has_term.line.foreground": "green",
     "clr.has_term.line.background": "reset",
     "clr.has_term.line.style": "normal",
+    "clr.has_term.term.foreground": "lightgreen_ex",
+    "clr.has_term.term.background": "reset",
+    "clr.has_term.term.style": "bright",
     "clr.no_term.line_number.foreground": "cyan",
     "clr.no_term.line_number.background": "reset",
     "clr.no_term.line_number.style": "dim",
@@ -14,10 +17,10 @@
     "default.include_filename": false,
     "default.search_content": true,
     "default.context": 0,
-    "default.in_cwd": true,
+    "default.in_cwd": false,
     "default.case_sensitive": false,
-    "updater.env.current_version": "1.0.3",
+    "updater.env.current_version": "1.0.4",
     "updater.canary": false,
-    "updater.env.canary_version": "1.0.4.4",
+    "updater.env.canary_version": "1.0.4.5",
     "updater.auto_update": false
 }
