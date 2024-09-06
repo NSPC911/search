@@ -175,7 +175,7 @@ def main():
                 elif remote_config["updater.env.current_version"] != current_config["updater.env.current_version"]:
                     print(f"{Fore.GREEN}New stable version found")
                     print(f"{Fore.YELLOW}Release notes: https://github.com/NSPC911/search/releases/tag/v{remote_config['updater.env.current_version']}")
-                    canary_current = "stable"
+                    canary_current = "current"
                 elif remote_config["updater.env.current_version"] == current_config["updater.env.current_version"]:
                     print(f"{Fore.GREEN}Stable version up-to-date!")
                     if current_config["updater.canary"] and remote_config["updater.env.canary_version"] == current_config["updater.env.canary_version"]:
