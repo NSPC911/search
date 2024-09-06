@@ -49,7 +49,7 @@ def config(readorset, key, changeto="", is_theme=False):
         try:
             cnfg[key] # Check whether exists
             cnfg[key] = changeto
-            dump_json("search.config.json",cnfg)
+            dump_json(config_path,cnfg)
             print(f"{Fore.GREEN}Set `{Fore.CYAN}{key}{Fore.GREEN}` to {Fore.MAGENTA}{changeto}")
         except KeyError:
             print(f"{Fore.RED}KeyError: `{key}` not found in search.config.json")

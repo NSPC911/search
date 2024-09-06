@@ -18,6 +18,6 @@
     "default.case_sensitive": false,
     "updater.env.current_version": "1.0.3",
     "updater.canary": false,
-    "updater.env.canary_version": "1.0.4.3",
+    "updater.env.canary_version": "1.0.4.4",
     "updater.auto_update": false
 }
