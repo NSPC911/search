@@ -104,7 +104,7 @@ def search_in_file(file_path, term, case_sensitive):
 def main():
     print()
     parser = argparse.ArgumentParser(description=f"Find.exe but {Fore.CYAN}better{Fore.RESET}")
-    parser.add_argument("term", nargs="?", help="Term to search for")
+    parser.add_argument("term", nargs="*", help="Term to search for")
     if config("read","default.search_content"):
         parser.add_argument("--no-search-content", "-nsc", action="store_true", default=False, help=f"{Fore.YELLOW}Exclude file content{Fore.RESET} from the search")
     else:
@@ -151,7 +151,7 @@ def main():
     if len(sys.argv) == 1:
         parser.print_help()
         exit(0)
-    
+    args.term = " ".join(args.term) # It's a list for some reason
     if args.config:
         configure(args.config)
         exit(0)

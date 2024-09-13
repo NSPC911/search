@@ -1,8 +1,21 @@
 from custom_functions import *
-import os, requests
+import os
 from colorama import Fore, Style, init, Back
 from shutil import copyfile
 init(strip=False, convert=False, autoreset=True)
+from time import sleep
+
+try:
+    import requests
+except ModuleNotFoundError:
+    # It would be installing in a seperate thread on search.py
+    print("requests is not found. Possibly will be installing on a seperate thread")
+    print("Waiting for 10 seconds before retrying (hopefullly it is installed)")
+    sleep(10)
+    try:
+        import requests
+    except ModuleNotFoundError:
+        print("Thread too slow, exit the program then run `python -m pip install requests`")
 
 sep = os.path.sep
 config_remote_url = "https://raw.githubusercontent.com/NSPC911/search/main/search.config.json"
