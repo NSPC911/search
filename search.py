@@ -1,21 +1,5 @@
-import os, sys, argparse, threading
+import os, sys, argparse
 from custom_functions import *
-
-req_import_string = threading.Event()
-# I'm not sure why reqests takes the longest time to import
-# So I'm gonna create a new thread for it
-def import_request():
-    global requests
-    try:
-        import requests
-    except ModuleNotFoundError:
-        install("requests")
-        import requests
-    req_import_string.set()
-
-string = threading.Thread(target=import_request)
-string.start()
-
 from config import *
 from colorama import Fore, init
 
@@ -73,7 +57,7 @@ def search_in_file(file_path, term, case_sensitive):
         lines = f.readlines()
 
     for line_number, line in enumerate(lines, start=1):
-        if (term in line if case_sensitive else term.lower() in line.lower()):
+        if (case_sensitive and term in line) or (term.lower() in line.lower()):
             if not samefile:
                 clear_line("-", "\n")
                 print(f"\r{Fore.WHITE}Found {Fore.YELLOW}{term} {Fore.WHITE}in {Fore.GREEN}{os.path.relpath(file_path, start=os.getcwd())}")
@@ -88,6 +72,7 @@ def search_in_file(file_path, term, case_sensitive):
                         line_marker = ">"
                         clrs = [config("read","clr.has_term.line_number",is_theme=True), config("read","clr.has_term.line",is_theme=True)]
                         line = lines[i][:-1]
+                        # I need to make it case-insensitive but it's hard
                         line = line.replace(term, f'{config("read","clr.has_term.term",is_theme=True)}{term}{clrs[1]}')
                     else:
                         line_marker = " "
@@ -101,62 +86,16 @@ def search_in_file(file_path, term, case_sensitive):
                         print(f"{clrs[0]}{line_marker} {i+1}{Fore.WHITE}\t: {clrs[1]}{line}{reset()}")
                         printed_line_numbers.append(i+1)
 
-def main():
-    print()
-    parser = argparse.ArgumentParser(description=f"Find.exe but {Fore.CYAN}better{Fore.RESET}")
-    parser.add_argument("term", nargs="*", help="Term to search for")
-    if config("read","default.search_content"):
-        parser.add_argument("--no-search-content", "-nsc", action="store_true", default=False, help=f"{Fore.YELLOW}Exclude file content{Fore.RESET} from the search")
-    else:
-        parser.add_argument("--search-content", "-sc", action="store_true", default=False, help=f"{Fore.YELLOW}Include file content{Fore.RESET} in the search")
-    if config("read","default.include_filename"):
-        parser.add_argument("--exclude-filename", "-nf", action="store_true", default=False, help=f"{Fore.YELLOW}Exclude file names{Fore.RESET} from the search")
-    else:
-        parser.add_argument("--include-filename", "-f", action="store_true", default=False, help=f"{Fore.YELLOW}Include file names{Fore.RESET} in the search")
-    if config("read","default.in_cwd"):
-        parser.add_argument("--recursive", "-r", action="store_true", default=False, help=f"Search {Fore.YELLOW}in sub-directories{Fore.RESET}")
-    else:
-        parser.add_argument("--in-cwd", "-nr", action="store_true", default=False, help=f"Search {Fore.YELLOW}only{Fore.RESET} in the current directory")
-    parser.add_argument("--context", "-c", type=int, default=config("read","default.context"), help=f"Number of {Fore.YELLOW}context lines{Fore.RESET} to show")
-    parser.add_argument("--file-name", "-fn", default="*", help=f"Search only in the {Fore.YELLOW}specified file name{Fore.RESET}")
-    if config("read","default.case_sensitive"):
-        parser.add_argument("--case-insensitive", "-ncs", action="store_true", default=False, help=f"Disable case-sensitive searching")
-    else:
-        parser.add_argument("--case-sensitive", "-cs", action="store_true", default=False, help=f"Enable case-sensitive searching")
-    parser.add_argument("--config", nargs=argparse.REMAINDER, metavar=('modifier', 'key', 'value'), help="Configure settings: modifier key value")
-    parser.add_argument("--update", "-u", action="store_true", help="Update files from remote")
-
+def main(namespace_arguments):
     global args
-    args = parser.parse_args()
-    try:
-        args.include_filename = not args.exclude_filename
-        delattr(args, "exclude_filename")
-    except AttributeError:
-        pass
-    try:
-        args.search_content = not args.no_search_content
-        delattr(args, "no_search_content")
-    except AttributeError:
-        pass
-    try:
-        args.in_cwd = not args.recursive
-        delattr(args, "recursive")
-    except AttributeError:
-        pass
-    try:
-        args.case_sensitive = not args.case_insensitive
-        delattr(args, "case_insensitive")
-    except AttributeError:
-        pass
-    if len(sys.argv) == 1:
-        parser.print_help()
-        exit(0)
-    args.term = " ".join(args.term) # It's a list for some reason
+    args = namespace_arguments
+    print()
     if args.config:
         configure(args.config)
         exit(0)
     try:
         if args.update or config("read","updater.auto_update"):
+            import requests
             # Screw you, you are updating everything
             response = requests.get(remote_url + "search.config.json")
             if response.status_code == 200:
@@ -245,9 +184,55 @@ def main():
     print()
 
 if __name__ == "__main__":
-    req_import_string.wait()
     try:
-        main()
+        parser = argparse.ArgumentParser(description=f"Find.exe but {Fore.CYAN}better{Fore.RESET}")
+        parser.add_argument("term", nargs="*", help="Term to search for")
+        if config("read","default.search_content"):
+            parser.add_argument("--no-search-content", "-nsc", action="store_true", default=False, help=f"{Fore.YELLOW}Exclude file content{Fore.RESET} from the search")
+        else:
+            parser.add_argument("--search-content", "-sc", action="store_true", default=False, help=f"{Fore.YELLOW}Include file content{Fore.RESET} in the search")
+        if config("read","default.include_filename"):
+            parser.add_argument("--exclude-filename", "-nf", action="store_true", default=False, help=f"{Fore.YELLOW}Exclude file names{Fore.RESET} from the search")
+        else:
+            parser.add_argument("--include-filename", "-f", action="store_true", default=False, help=f"{Fore.YELLOW}Include file names{Fore.RESET} in the search")
+        if config("read","default.in_cwd"):
+            parser.add_argument("--recursive", "-r", action="store_true", default=False, help=f"Search {Fore.YELLOW}in sub-directories{Fore.RESET}")
+        else:
+            parser.add_argument("--in-cwd", "-nr", action="store_true", default=False, help=f"Search {Fore.YELLOW}only{Fore.RESET} in the current directory")
+        parser.add_argument("--context", "-c", type=int, default=config("read","default.context"), help=f"Number of {Fore.YELLOW}context lines{Fore.RESET} to show")
+        parser.add_argument("--file-name", "-fn", default="*", help=f"Search only in the {Fore.YELLOW}specified file name{Fore.RESET}")
+        if config("read","default.case_sensitive"):
+            parser.add_argument("--case-insensitive", "-ncs", action="store_true", default=False, help=f"Disable case-sensitive searching")
+        else:
+            parser.add_argument("--case-sensitive", "-cs", action="store_true", default=False, help=f"Enable case-sensitive searching")
+        parser.add_argument("--config", nargs=argparse.REMAINDER, metavar=('modifier', 'key', 'value'), help=f"Extra args: [{Fore.BLUE}set{Fore.WHITE}/{Fore.CYAN}read{Fore.WHITE}/where/list/reset] [{Fore.BLUE}key{Fore.WHITE}/{Fore.CYAN}key{Fore.WHITE}] [{Fore.BLUE}value{Fore.WHITE}]")
+        parser.add_argument("--update", "-u", action="store_true", help="Update files from remote")
+        args = parser.parse_args()
+        try:
+            args.include_filename = not args.exclude_filename
+            delattr(args, "exclude_filename")
+        except AttributeError:
+            pass
+        try:
+            args.search_content = not args.no_search_content
+            delattr(args, "no_search_content")
+        except AttributeError:
+            pass
+        try:
+            args.in_cwd = not args.recursive
+            delattr(args, "recursive")
+        except AttributeError:
+            pass
+        try:
+            args.case_sensitive = not args.case_insensitive
+            delattr(args, "case_insensitive")
+        except AttributeError:
+            pass
+        if len(sys.argv) == 1:
+            parser.print_help()
+            exit(0)
+        args.term = " ".join(args.term) # It's a list for some reason
+        main(args)
     except KeyboardInterrupt:
         pass
     except ReferenceError: # I just use random errors that suit lol

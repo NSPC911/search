@@ -3,19 +3,6 @@ import os
 from colorama import Fore, Style, init, Back
 from shutil import copyfile
 init(strip=False, convert=False, autoreset=True)
-from time import sleep
-
-try:
-    import requests
-except ModuleNotFoundError:
-    # It would be installing in a seperate thread on search.py
-    print("requests is not found. Possibly will be installing on a seperate thread")
-    print("Waiting for 10 seconds before retrying (hopefullly it is installed)")
-    sleep(10)
-    try:
-        import requests
-    except ModuleNotFoundError:
-        print("Thread too slow, exit the program then run `python -m pip install requests`")
 
 sep = os.path.sep
 config_remote_url = "https://raw.githubusercontent.com/NSPC911/search/main/search.config.json"
@@ -83,10 +70,11 @@ def configure(listarg):
         print(f"{Fore.RED}FlagError: Expected modifier keyword after `--config` but received None")
         exit(1)
     try:
-        if listarg[1] in ["reset","update","where"]:
+        if listarg[1] in ["reset","where"]:
             raise IndexError
     except IndexError:
         if listarg[0] == "reset":
+            import requests
             response = requests.get(config_remote_url)
             if response.status_code == 200:
                 dump_json(config_path,response.json())
