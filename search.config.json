@@ -25,6 +25,6 @@
     ],
     "updater.env.current_version": "1.0.4",
     "updater.canary": false,
-    "updater.env.canary_version": "1.0.5.3",
+    "updater.env.canary_version": "1.0.5.4",
     "updater.auto_update": false
 }

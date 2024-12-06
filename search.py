@@ -236,7 +236,6 @@ if __name__ == "__main__":
             delattr(args, "case_insensitive")
         except AttributeError:
             pass
-        print(f'"{args.term}"')
         if len(sys.argv) == 1:
             parser.print_help()
             exit(0)
