@@ -2,10 +2,8 @@ import os, sys, argparse
 from custom_functions import *
 from config import *
 from colorama import Fore, init
-
 # Initialize colorama
 init(strip=False, convert=False, autoreset=True)
-remote_url = "https://raw.githubusercontent.com/NSPC911/search/main/"
 
 def found_smth():
     global found
@@ -95,6 +93,7 @@ def main(namespace_arguments):
         exit(0)
     try:
         if args.update or config("read","updater.auto_update"):
+            remote_url = "https://raw.githubusercontent.com/NSPC911/search/main/"
             import requests
             # Screw you, you are updating everything
             response = requests.get(remote_url + "search.config.json")
@@ -117,7 +116,7 @@ def main(namespace_arguments):
                     canary_current = "current"
                 elif remote_config["updater.env.current_version"] == current_config["updater.env.current_version"]:
                     print(f"{Fore.GREEN}Stable version up-to-date!")
-                    if current_config["updater.canary"] and remote_config["updater.env.canary_version"] == current_config["updater.env.canary_version"]:
+                    if remote_config["updater.env.canary_version"] == current_config["updater.env.canary_version"]:
                         print(f"{Fore.GREEN}Canary version up-to-date!")
                     else:
                         print(f"{Fore.LIGHTMAGENTA_EX}Canary version has changes!")
@@ -140,6 +139,8 @@ def main(namespace_arguments):
                 new_config = {**remote_config, **current_config}
                 if current_config["updater.canary"]:
                     new_config["updater.env.canary_version"] = remote_config["updater.env.canary_version"]
+                else:
+                    remote_url = f"https://raw.githubusercontent.com/NSPC911/search/refs/tags/v{remote_config['updater.env.current_version']}/"
                 new_config["updater.env.current_version"] = remote_config["updater.env.current_version"]
                 dump_json(config_path,new_config)
                 print(f"{Fore.GREEN}Updated search.config.json from remote!")
@@ -228,6 +229,7 @@ if __name__ == "__main__":
             delattr(args, "case_insensitive")
         except AttributeError:
             pass
+        print(f'"{args.term}"')
         if len(sys.argv) == 1:
             parser.print_help()
             exit(0)
