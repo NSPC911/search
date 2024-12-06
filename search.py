@@ -16,10 +16,15 @@ def search_dir(directory, term, case_sensitive):
             file_path = os.path.join(root, file)
             clear_line()
             relative_file_path = os.path.relpath(file_path, start=os.getcwd())
-            if relative_file_path.split(os.path.sep)[0] in config("read","default.ignore_dirs"):
-                if not nexted:
-                    print(f"\r{Fore.YELLOW}Skipping {Fore.GREEN}{relative_file_path.split(os.path.sep)[0]}", end="")
-                    nexted = True
+            splitted = relative_file_path.split(os.path.sep)
+            docontinue = False
+            for ddir in config("read","default.ignore_dirs"):
+                if ddir in splitted:
+                    if not nexted:
+                        print(f"\r{Fore.YELLOW}Skipping {Fore.GREEN}{relative_file_path.split(os.path.sep)}", end="")
+                        nexted = True
+                    docontinue = True
+            if docontinue:
                 continue
             nexted = False
             print(f"\r{relative_file_path}", end="")
