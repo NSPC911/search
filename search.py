@@ -10,11 +10,18 @@ def found_smth():
     found = True
 
 def search_dir(directory, term, case_sensitive):
+    nexted = False # I create stupid variable names
     for root, _, files in os.walk(directory):
         for file in files:
             file_path = os.path.join(root, file)
             clear_line()
             relative_file_path = os.path.relpath(file_path, start=os.getcwd())
+            if relative_file_path.split(os.path.sep)[0] in config("read","default.ignore_dirs"):
+                if not nexted:
+                    print(f"\r{Fore.YELLOW}Skipping {Fore.GREEN}{relative_file_path.split(os.path.sep)[0]}", end="")
+                    nexted = True
+                continue
+            nexted = False
             print(f"\r{relative_file_path}", end="")
             if not is_binary(file_path):
                 search_in_file(file_path, term, case_sensitive)

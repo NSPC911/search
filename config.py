@@ -126,6 +126,10 @@ def configure(listarg):
             elif "env" in listarg[1]:
                 print(f"{Fore.RED}ConfigError: Cannot change env variables in search.config.json")
                 exit(1)
+            elif listarg[1] == "default.ignore_dirs":
+                print(f"{Fore.RED}ConfigError: Cannot change `{Fore.BLUE}default.ignore_dirs{Fore.RED}` yet in search.config.json")
+                print("This feature is still in development.")
+                exit(1)
             else:
                 if listarg[2].isnumeric():
                     config("set",listarg[1],int(listarg[2]))
