@@ -18,27 +18,31 @@ def search_dir(directory, term, case_sensitive):
             relative_file_path = os.path.relpath(file_path, start=os.getcwd())
             splitted = relative_file_path.split(os.path.sep)
             docontinue = False
-            for ddir in config("read","default.ignore_dirs"):
+            for ddir in config("read", "default.ignore_dirs"):
                 if ddir in splitted:
                     if not nexted:
-                        print(f"\r{Fore.YELLOW}Skipping {Fore.GREEN}{relative_file_path.split(os.path.sep)}", end="")
+                        clear_line()
+                        print(f"\r", end="")
                         nexted = True
                     docontinue = True
             if docontinue:
                 continue
             nexted = False
-            print(f"\r{relative_file_path}", end="")
+            if args.verbose:
+                clear_line()
+                print(f"\r{relative_file_path}", end="")
             if not is_binary(file_path):
                 search_in_file(file_path, term, case_sensitive)
-            elif args.include_filename and term in str(relative_file_path):
+            elif args.include_filename and ((case_sensitive and term in str(relative_file_path)) or term.lower() in str(relative_file_path).lower()):
                 clear_line("-", "\n")
                 print(f"\r{Fore.WHITE}Found {Fore.YELLOW}{term} {Fore.WHITE}in {Fore.GREEN}{os.path.relpath(file_path, start=os.getcwd())}")
                 found_smth()
 
 def search_in_cwd(term, case_sensitive):
     for item in os.listdir(os.getcwd()):
-        clear_line()
-        print(f"\r{item}", end="")
+        if args.verbose:
+            clear_line()
+            print(f"\r{item}", end="")
         if os.path.isfile(item) and not is_binary(item):
             file_path = os.path.join(os.getcwd(), item)
             search_in_file(file_path, term, case_sensitive)
@@ -80,13 +84,13 @@ def search_in_file(file_path, term, case_sensitive):
                 if i > last_printed_line:
                     if line_number - 1 == i:
                         line_marker = ">"
-                        clrs = [config("read","clr.has_term.line_number",is_theme=True), config("read","clr.has_term.line",is_theme=True)]
+                        clrs = [config("read", "clr.has_term.line_number",is_theme=True), config("read", "clr.has_term.line",is_theme=True)]
                         line = lines[i][:-1]
                         # I need to make it case-insensitive but it's hard
-                        line = line.replace(term, f'{config("read","clr.has_term.term",is_theme=True)}{term}{clrs[1]}')
+                        line = line.replace(term, f'{config("read", "clr.has_term.term",is_theme=True)}{term}{clrs[1]}')
                     else:
                         line_marker = " "
-                        clrs = [config("read","clr.no_term.line_number",is_theme=True), config("read","clr.no_term.line",is_theme=True)]
+                        clrs = [config("read", "clr.no_term.line_number",is_theme=True), config("read", "clr.no_term.line",is_theme=True)]
                         line = lines[i][:-1]
                     if term in lines[i] and i+1 < line_number or i+1 in printed_line_numbers:
                         pass
@@ -104,11 +108,11 @@ def main(namespace_arguments):
         configure(args.config)
         exit(0)
     try:
-        if args.update or config("read","updater.auto_update"):
+        if args.update or config("read", "updater.auto_update"):
             remote_url = "https://raw.githubusercontent.com/NSPC911/search/main/"
             import requests
             # Screw you, you are updating everything
-            response = requests.get(remote_url + "search.config.json")
+            response = requests.get(remote_url + "config.json")
             if response.status_code == 200:
                 remote_config = response.json()
                 current_config = load_json(config_path)
@@ -138,11 +142,11 @@ def main(namespace_arguments):
                 should_update = ""
                 if canary_current == "canary":
                     print(f"{Fore.YELLOW}Canary versions are bound to have errors. You will need to set {Fore.LIGHTBLUE_EX}`updater.env.current_version`{Fore.YELLOW} to an older version and disable {Fore.LIGHTBLUE_EX}`updater.canary`{Fore.YELLOW} to revert to the stable version.")
-                while not should_update.lower().startswith(("y","n")):
+                while not should_update.lower().startswith(("y", "n")):
                     should_update = input(f"Update from {Fore.LIGHTRED_EX}v{current_config[f'updater.env.{canary_current}_version']}{Fore.RESET} to {Fore.GREEN}v{remote_config[f'updater.env.{canary_current}_version']}{Fore.RESET}? [Y/n] ")
                 if should_update.lower().startswith("n"):
                     print(f"{Fore.RED}Update cancelled!")
-                    if config("read","updater.auto_update") and args.term != "":
+                    if config("read", "updater.auto_update") and args.term != "":
                         print(f"{Fore.LIGHTGREEN_EX}Continuing search...")
                         raise ChildProcessError
                     exit(0)
@@ -155,9 +159,9 @@ def main(namespace_arguments):
                     remote_url = f"https://raw.githubusercontent.com/NSPC911/search/refs/tags/v{remote_config['updater.env.current_version']}/"
                 new_config["updater.env.current_version"] = remote_config["updater.env.current_version"]
                 dump_json(config_path,new_config)
-                print(f"{Fore.GREEN}Updated search.config.json from remote!")
+                print(f"{Fore.GREEN}Updated config.json from remote!")
             else:
-                raise ReferenceError("search.config.json")
+                raise ReferenceError("config.json")
             files_to_get = ["config.py", "custom_functions.py", "search.py"]
             for file in files_to_get:
                 response = requests.get(remote_url + file)
@@ -168,9 +172,9 @@ def main(namespace_arguments):
                 else:
                     raise ReferenceError(file)
             print(f"{Fore.GREEN}Updated all scripts from remote!")
-            if args.term != "" and config("read","updater.auto_update"):
+            if args.term != "" and config("read", "updater.auto_update"):
                 should_continue = ""
-                while not should_continue.lower().startswith(("y","n")):
+                while not should_continue.lower().startswith(("y", "n")):
                     should_continue = input(f"{Fore.YELLOW}Continue search? [Y/n] {Fore.RESET}")
                 if should_continue.lower().startswith("y"):
                     raise ChildProcessError
@@ -200,27 +204,36 @@ if __name__ == "__main__":
     try:
         parser = argparse.ArgumentParser(description=f"Find.exe but {Fore.CYAN}better{Fore.RESET}")
         parser.add_argument("term", nargs="*", help="Term to search for")
-        if config("read","default.search_content"):
+        if config("read", "default.show_current"):
+            parser.add_argument("--quiet", "-q", action="store_true", default=False, help=f"{Fore.YELLOW}Don't show current file{Fore.RESET}")
+        else:
+            parser.add_argument("--verbose", "-v", action="store_true", default=False, help=f"{Fore.YELLOW}Show current file{Fore.RESET} being searched")
+        if config("read", "default.search_content"):
             parser.add_argument("--no-search-content", "-nsc", action="store_true", default=False, help=f"{Fore.YELLOW}Exclude file content{Fore.RESET} from the search")
         else:
             parser.add_argument("--search-content", "-sc", action="store_true", default=False, help=f"{Fore.YELLOW}Include file content{Fore.RESET} in the search")
-        if config("read","default.include_filename"):
+        if config("read", "default.include_filename"):
             parser.add_argument("--exclude-filename", "-nf", action="store_true", default=False, help=f"{Fore.YELLOW}Exclude file names{Fore.RESET} from the search")
         else:
             parser.add_argument("--include-filename", "-f", action="store_true", default=False, help=f"{Fore.YELLOW}Include file names{Fore.RESET} in the search")
-        if config("read","default.in_cwd"):
+        if config("read", "default.in_cwd"):
             parser.add_argument("--recursive", "-r", action="store_true", default=False, help=f"Search {Fore.YELLOW}in sub-directories{Fore.RESET}")
         else:
             parser.add_argument("--in-cwd", "-nr", action="store_true", default=False, help=f"Search {Fore.YELLOW}only{Fore.RESET} in the current directory")
-        parser.add_argument("--context", "-c", type=int, default=config("read","default.context"), help=f"Number of {Fore.YELLOW}context lines{Fore.RESET} to show")
+        parser.add_argument("--context", "-c", type=int, default=config("read", "default.context"), help=f"Number of {Fore.YELLOW}context lines{Fore.RESET} to show")
         parser.add_argument("--file-name", "-fn", default="*", help=f"Search only in the {Fore.YELLOW}specified file name{Fore.RESET}")
-        if config("read","default.case_sensitive"):
+        if config("read", "default.case_sensitive"):
             parser.add_argument("--case-insensitive", "-ncs", action="store_true", default=False, help=f"Disable case-sensitive searching")
         else:
             parser.add_argument("--case-sensitive", "-cs", action="store_true", default=False, help=f"Enable case-sensitive searching")
         parser.add_argument("--config", nargs=argparse.REMAINDER, metavar=('modifier', 'key', 'value'), help=f"Extra args: [{Fore.BLUE}set{Fore.WHITE}/{Fore.CYAN}read{Fore.WHITE}/where/list/reset] [{Fore.BLUE}key{Fore.WHITE}/{Fore.CYAN}key{Fore.WHITE}] [{Fore.BLUE}value{Fore.WHITE}]")
         parser.add_argument("--update", "-u", action="store_true", help="Update files from remote")
         args = parser.parse_args()
+        try:
+            args.verbose = not args.quiet
+            delattr(args, "quiet")
+        except AttributeError:
+            pass
         try:
             args.include_filename = not args.exclude_filename
             delattr(args, "exclude_filename")

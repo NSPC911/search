@@ -5,13 +5,13 @@ from shutil import copyfile
 init(strip=False, convert=False, autoreset=True)
 
 sep = os.path.sep
-config_remote_url = "https://raw.githubusercontent.com/NSPC911/search/main/search.config.json"
-config_path = f"{os.path.dirname(os.path.realpath(__file__))}{sep}search.config.json"
+config_remote_url = "https://raw.githubusercontent.com/NSPC911/search/main/config.json"
+config_path = f"{os.path.dirname(os.path.realpath(__file__))}{sep}config.json"
 # Just exists I guess...
 if f"scoop{sep}apps" in config_path:
-    if not os.path.exists(f"{os.path.expanduser("~")}{sep}scoop{sep}persist{sep}search.config.json"):
-        copyfile(config_path,f"{os.path.expanduser('~')}{sep}scoop{sep}persist{sep}search{sep}search.config.json")
-    config_path = f"{os.path.expanduser('~')}{sep}scoop{sep}persist{sep}search{sep}search.config.json"
+    if not os.path.exists(f"{os.path.expanduser("~")}{sep}scoop{sep}persist{sep}config.json"):
+        copyfile(config_path,f"{os.path.expanduser('~')}{sep}scoop{sep}persist{sep}search{sep}config.json")
+    config_path = f"{os.path.expanduser('~')}{sep}scoop{sep}persist{sep}search{sep}config.json"
 
 def config(readorset, key, changeto="", is_theme=False):
     cnfg = load_json(config_path)
@@ -43,7 +43,7 @@ def config(readorset, key, changeto="", is_theme=False):
             try:
                 return cnfg[key]
             except KeyError:
-                print(f"{Fore.RED}KeyError: `{key}` not found in search.config.json")
+                print(f"{Fore.RED}KeyError: `{key}` not found in config.json")
                 exit(1)
     elif readorset == "set":
         try:
@@ -52,7 +52,7 @@ def config(readorset, key, changeto="", is_theme=False):
             dump_json(config_path,cnfg)
             print(f"{Fore.GREEN}Set `{Fore.CYAN}{key}{Fore.GREEN}` to {Fore.MAGENTA}{changeto}")
         except KeyError:
-            print(f"{Fore.RED}KeyError: `{key}` not found in search.config.json")
+            print(f"{Fore.RED}KeyError: `{key}` not found in config.json")
             exit(1)
 
 
@@ -60,7 +60,7 @@ def reset():
     return f"{Fore.RESET}{Back.RESET}{Style.RESET_ALL}" 
 
 if config("read","default.context") < 0:
-    print(f"{Fore.RED}RangeError: `default.context` in search.config.json is less than 0.")
+    print(f"{Fore.RED}RangeError: `default.context` in config.json is less than 0.")
     exit(0)
 
 def configure(listarg):
@@ -78,21 +78,21 @@ def configure(listarg):
             response = requests.get(config_remote_url)
             if response.status_code == 200:
                 dump_json(config_path,response.json())
-                print(f"{Fore.GREEN}Reset search.config.json to default from remote")
+                print(f"{Fore.GREEN}Reset config.json to default from remote")
             else:
                 print(f"{Fore.RED}RequestError: Couldn't fetch data from remote for {Fore.YELLOW}config.json")
                 print(f"{Fore.RED}Please check your internet connection and try again.")
                 exit(1)
             return
         elif listarg[0] == "list":
-            print(f"{Fore.GREEN}Listing all keys in search.config.json:")
+            print(f"{Fore.GREEN}Listing all keys in config.json:")
             for key in load_json(config_path):
                 if key.startswith("comment"):
                     continue # Ya don't need to see comments
                 print(f"{Fore.CYAN}{key}{Fore.WHITE} is set as {Fore.MAGENTA}{config('read',key)}")
             exit(0)
         elif listarg[0] == "where":
-            print(f"{Fore.GREEN}search.config.json is located at {Fore.CYAN}{config_path}")
+            print(f"{Fore.GREEN}config.json is located at {Fore.CYAN}{config_path}")
         else:
             print(f"{Fore.RED}FlagError: Expected key to `{listarg[0]}` but received None")
             exit(1)
@@ -124,10 +124,10 @@ def configure(listarg):
                 print(f"Allowed definitions: {Style.BRIGHT}BRIGHT, {Style.NORMAL}NORMAL, {Style.DIM}DIM, {Style.RESET_ALL}RESET_ALL")
                 exit(1)
             elif "env" in listarg[1]:
-                print(f"{Fore.RED}ConfigError: Cannot change env variables in search.config.json")
+                print(f"{Fore.RED}ConfigError: Cannot change env variables in config.json")
                 exit(1)
             elif listarg[1] == "default.ignore_dirs":
-                print(f"{Fore.RED}ConfigError: Cannot change `{Fore.BLUE}default.ignore_dirs{Fore.RED}` yet in search.config.json")
+                print(f"{Fore.RED}ConfigError: Cannot change `{Fore.BLUE}default.ignore_dirs{Fore.RED}` yet in config.json")
                 print("This feature is still in development.")
                 exit(1)
             else:

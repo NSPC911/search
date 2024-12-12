@@ -21,10 +21,12 @@
     "default.case_sensitive": false,
     "default.ignore_dirs": [
         ".git",
-        "node_modules"
+        "node_modules",
+        "__pycache__"
     ],
+    "default.show_current": true,
     "updater.env.current_version": "1.0.4",
     "updater.canary": false,
-    "updater.env.canary_version": "1.0.5.5",
+    "updater.env.canary_version": "1.0.5.6",
     "updater.auto_update": false
 }

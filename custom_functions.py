@@ -31,14 +31,19 @@ init(strip=False, convert=False, autoreset=True)
 
 # Simple function to load json from file
 def load_json(path):
-    with open(path, "r") as file:
-        try:
+    try:
+        with open(path, "r") as file:
             return loads(file.read())
-        except JSONDecodeError:
-            print(f"\n{Fore.RED}{path} got a JSON Decode Error!")
-            print(f"Redownload from https://github.com/NSPC911/scripts/blob/main/search.config.json if you can't fix it!")
-            print(f"{Fore.YELLOW}{traceback.format_exc()}")
-            exit()
+    except JSONDecodeError:
+        print(f"\n{Fore.RED}{path} got a JSON Decode Error!")
+        print(f"Redownload from https://github.com/NSPC911/scripts/blob/main/config.json if you can't fix it!")
+        print(f"{Fore.YELLOW}{traceback.format_exc()}")
+        exit(1)
+    except FileNotFoundError:
+        print(f"\n{Fore.RED}{path} not found!")
+        print(f"Make sure that the config file still exists and not deleted!")
+        print(f"{Fore.YELLOW}{traceback.format_exc()}")
+        exit(1)
 
 
 # Simple function to save json into file
