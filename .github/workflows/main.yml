@@ -13,11 +13,20 @@ jobs:
 
       - name: Run Archive Creator script
         run: |
-          python archive_creator.py
+          python archive_creator.py --workflow
       
-      - name: Upload as artifact
+      - name: Upload bash artifact
         uses: actions/upload-artifact@v4
         with:
-          path: archives/
+          name: bash
+          path: archives/bash
+          if-no-files-found: warn
+          compression-level: 9
+
+      - name: Upload bat artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bat
+          path: archives/bat
           if-no-files-found: warn
           compression-level: 9
