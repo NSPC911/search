@@ -22,9 +22,9 @@
         "__pycache__"
     ],
     "default.show_current": true,
-    "updater.env.current_version": "1.0.4",
+    "updater.env.current_version": "1.1.0",
     "updater.canary": false,
-    "updater.env.canary_version": "1.0.5.9",
+    "updater.env.canary_version": "1.1.0.0",
     "updater.auto_update": false,
     "config.env.colors": {
         "comment": "These are the supported colors you can refer to",
