@@ -119,8 +119,10 @@ def main(namespace_arguments):
             if response.status_code == 200:
                 remote_config = response.json()
                 current_config = load_json(config_path)
+                version = {"canary": {"remote": remote_config["updater.env.canary_version"].split("."), "local": current_config["updater.env.canary_version"].split(".")}, "stable": {"remote": remote_config["updater.env.current_version"].split(), "local": current_config["updater.env.current_version"].split()}}
+                print(version)
                 # Update Checker
-                if current_config["updater.canary"] and ( remote_config["updater.env.canary_version"][0] > current_config["updater.env.canary_version"][0] or  remote_config["updater.env.canary_version"][1] > current_config["updater.env.canary_version"][1] or  remote_config["updater.env.canary_version"][2] > current_config["updater.env.canary_version"][2] or  remote_config["updater.env.canary_version"][3] > current_config["updater.env.canary_version"][3]):
+                if current_config["updater.canary"] and ( version["canary"]["remote"][0] > version["canary"]["local"][0] or  version["canary"]["remote"][1] > version["canary"]["local"][1] or  version["canary"]["remote"][2] > version["canary"]["local"][2] or  version["canary"]["remote"][3] > version["canary"]["local"][3]):
                     print(f"{Fore.GREEN}New canary version found!")
                     # Get latest commit details (my commits are terrible)
                     ghapi_response = requests.get("https://api.github.com/repos/NSPC911/search/commits")
@@ -129,7 +131,7 @@ def main(namespace_arguments):
                         print(f"Latest commit:\n{Fore.CYAN}{commit_details['message']}")
                         print(f"Commit Hash: {Fore.LIGHTMAGENTA_EX}{commit_details['tree']['sha']}")
                     canary_current = "canary"
-                elif ( remote_config["updater.env.current_version"][0] > current_config["updater.env.current_version"][0] or remote_config["updater.env.current_version"][1] > current_config["updater.env.current_version"][1] or remote_config["updater.env.current_version"][2] > current_config["updater.env.current_version"][2] ):
+                elif ( version["stable"]["remote"][0] > version["stable"]["local"][0] or version["stable"]["remote"][1] > version["stable"]["local"][1] or version["stable"]["remote"][2] > version["stable"]["local"][2] ):
                     print(f"{Fore.GREEN}New stable version found")
                     print(f"{Fore.YELLOW}Release notes: https://github.com/NSPC911/search/releases/tag/v{remote_config['updater.env.current_version']}")
                     canary_current = "current"
@@ -143,6 +145,17 @@ def main(namespace_arguments):
                     exit(0)
                 # Update Chooser
                 should_update = ""
+                notes_response = requests.get(remote_url + "notes.json")
+                if notes_response.status_code == 200:
+                    notes = notes_response.json()
+                    try:
+                        print("Updater Notes:")
+                        note = notes[remote_config["updater.env.current_version"]]
+                        print('-' * (len(note) + 4))
+                        print(f'| {note} |')
+                        print('-' * (len(note) + 4))
+                    except KeyError:
+                        pass
                 if canary_current == "canary":
                     print(f"{Fore.YELLOW}Canary versions are bound to have errors. You will need to set {Fore.LIGHTBLUE_EX}`updater.env.current_version`{Fore.YELLOW} to an older version and disable {Fore.LIGHTBLUE_EX}`updater.canary`{Fore.YELLOW} to revert to the stable version.")
                 while not should_update.lower().startswith(("y", "n")):

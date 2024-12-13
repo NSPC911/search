@@ -17,8 +17,8 @@ all_files = [
 ]
 
 archive_specs = {
-    'bat.zip': [f for f in all_files if f not in ['.gitignore', 'search.sh', 'archive_creator.py', 'search.json']],
-    'bash.zip': [f for f in all_files if f not in ['.gitignore', 'search.bat', 'archive_creator.py', 'search.json']]
+    'bat.zip': [f for f in all_files if f not in ['.gitignore', 'search.sh', 'archive_creator.py', 'search.json', 'notes.json']],
+    'bash.zip': [f for f in all_files if f not in ['.gitignore', 'search.bat', 'archive_creator.py', 'search.json', 'notes.json']]
 }
 
 for archive_name, files_to_include in archive_specs.items():
