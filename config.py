@@ -13,7 +13,7 @@ if f"scoop{sep}apps" in config_path:
         copyfile(config_path,f"{os.path.expanduser('~')}{sep}scoop{sep}persist{sep}search{sep}config.json")
     config_path = f"{os.path.expanduser('~')}{sep}scoop{sep}persist{sep}search{sep}config.json"
 
-def config(readorset, key, changeto="", is_theme=False):
+def config(readorset:str, key:str, changeto="", is_theme:bool=False):
     cnfg = load_json(config_path)
     if readorset == "read":
         if is_theme:
@@ -67,67 +67,91 @@ def configure(listarg):
     try:
         listarg[0]
     except IndexError:
-        print(f"{Fore.RED}FlagError: Expected modifier keyword after `--config` but received None")
+        print(f"Supported arguments for {Fore.LIGHTBLUE_EX}--config{Fore.WHITE}")
+        print(f"  {Fore.LIGHTBLUE_EX}set{Fore.WHITE}\t[{Fore.LIGHTBLUE_EX}key{Fore.WHITE}]\t[{Fore.LIGHTBLUE_EX}value{Fore.WHITE}]")
+        print("\tSet a key to the value given")
+        print(f"  {Fore.CYAN}read{Fore.WHITE}\t[{Fore.CYAN}key{Fore.WHITE}]")
+        print("\tOutput the current value for the key")
+        print(f"  {Fore.YELLOW}where{Fore.WHITE}")
+        print("\tLocate where the config is found at")
+        print(f"  {Fore.GREEN}list{Fore.WHITE}")
+        print("\tList the keys and their corresponsing values")
+        print(f"  {Fore.LIGHTBLACK_EX}reset{Fore.WHITE}")
+        print("\tReset the config")
         exit(1)
-    try:
-        if listarg[1] in ["reset","where"]:
-            raise IndexError
-    except IndexError:
-        if listarg[0] == "reset":
-            import requests
+    if listarg[0] == "reset":
+        import requests
+        try:
             response = requests.get(config_remote_url)
-            if response.status_code == 200:
-                dump_json(config_path,response.json())
-                print(f"{Fore.GREEN}Reset config.json to default from remote")
-            else:
-                print(f"{Fore.RED}RequestError: Couldn't fetch data from remote for {Fore.YELLOW}config.json")
-                print(f"{Fore.RED}Please check your internet connection and try again.")
-                exit(1)
-            return
-        elif listarg[0] == "list":
-            print(f"{Fore.GREEN}Listing all keys in config.json:")
-            for key in load_json(config_path):
-                if key.startswith("comment"):
-                    continue # Ya don't need to see comments
-                print(f"{Fore.CYAN}{key}{Fore.WHITE} is set as {Fore.MAGENTA}{config('read',key)}")
-            exit(0)
-        elif listarg[0] == "where":
-            print(f"{Fore.GREEN}config.json is located at {Fore.CYAN}{config_path}")
-        else:
-            print(f"{Fore.RED}FlagError: Expected key to `{listarg[0]}` but received None")
+        except requests.exceptions.ConnectionError:
+            print(f"{Fore.RED}ConnectionError: Max retries exceeded, likely due to no connection.")
+            print(f"{Fore.YELLOW}\tTurn off Flight Mode and connect to a WiFi, or restart your device.")
             exit(1)
+        if response.status_code == 200:
+            dump_json(config_path,response.json())
+            print(f"{Fore.GREEN}Reset config.json to default from remote")
+        else:
+            print(f"{Fore.RED}RequestError: Couldn't fetch data from remote for {Fore.YELLOW}config.json")
+            print(f"{Fore.RED}Please check your internet connection and try again.")
+            exit(1)
+        return
+    elif listarg[0] == "list":
+        print(f"{' ' * 16}Key{' ' * 16} |     Value")
+        print(f'{"-" * 52}')
+        bools = config("read", "config.env.type.boolean")
+        for key in load_json(config_path):
+            if "env" in key:
+                continue # Ya don't need to see environment variables
+            if "foreground" in key:
+                print(f"{Fore.CYAN}{key}{Fore.WHITE}{" " * (35 - len(key))} | {Fore.__dict__[config('read',key).upper()]}{config('read',key)}")
+            elif "background" in key:
+                print(f"{Fore.CYAN}{key}{Fore.WHITE}{" " * (35 - len(key))} | {Back.__dict__[config('read',key).upper()]}{config('read',key)}")
+            elif "style" in key:
+                print(f"{Fore.CYAN}{key}{Fore.WHITE}{" " * (35 - len(key))} | {Style.__dict__[config('read',key).upper()]}{config('read',key)}")
+            elif key in bools:
+                readed = config('read',key)
+                print(f"{Fore.CYAN}{key}{Fore.WHITE}{" " * (35 - len(key))} | {Fore.LIGHTGREEN_EX if readed == True else Fore.LIGHTRED_EX}{readed}")
+            else:
+                print(f"{Fore.CYAN}{key}{Fore.WHITE}{" " * (35 - len(key))} | {Fore.MAGENTA}{config('read',key)}")
+        exit(0)
+    elif listarg[0] == "where":
+        print(f"{Fore.GREEN}config.json is located at {Fore.CYAN}{config_path}")
+        exit(0)
     try:
         last = listarg.pop().split()
         listarg.extend(last)
         if listarg[0] == "set":
-            if listarg[2].lower() in ["true","false"] and listarg[1] in ["default.include_filename","default.in_cwd","default.case_sensitive","updater.canary"]:
-                config("set",listarg[1],listarg[2].lower()=="true")
-            elif listarg[1] in ["default.include_filename","default.in_cwd","default.case_sensitive", "updater.config"]:
-                print(f"Allowed definitions: {Fore.GREEN}True, {Fore.RED}False")
-                exit(1)
+            if listarg[1] in config("read", "config.env.type.boolean"):
+                if listarg[2].lower() in ["true","false"]:
+                    config("set",listarg[1],listarg[2].lower()=="true")
+                else:
+                    print(f"Allowed definitions: {Fore.GREEN}True{reset()}, {Fore.RED}False")
+                    exit(1)
             elif listarg[1] == "default.context" and listarg[2].isnumeric():
                 config("set",listarg[1],int(listarg[2]))
             elif listarg[1] == "default.context":
                 print(f"Allowed definitions: Any integer above 0")
                 exit(1)
-            elif listarg[1].startswith("clr") and (listarg[1].endswith("foreground") or listarg[1].endswith("background")) and listarg[2].lower() in ["red","green","yellow","blue","magenta","cyan","white","black","lightblack_ex","lightblue_ex","lightcyan_ex","lightgreen_ex","lightmagenta_ex","lightred_ex","lightwhite_ex","lightyellow_ex"]:
+            elif listarg[1].startswith("clr") and (listarg[1].endswith("foreground") or listarg[1].endswith("background")) and listarg[2].lower() in ["red","green","yellow","blue","magenta","cyan","white","black","lightblack_ex","lightblue_ex","lightcyan_ex","lightgreen_ex","lightmagenta_ex","lightred_ex","lightwhite_ex","lightyellow_ex","reset"]:
                 config("set",listarg[1],listarg[2].lower())
             elif listarg[1].startswith("clr") and listarg[1].endswith("foreground"):
-                print(f"Allowed definitions:\n{Fore.RED}red, {Fore.GREEN}green, {Fore.YELLOW}yellow, {Fore.BLUE}blue, {Fore.MAGENTA}magenta, {Fore.CYAN}cyan, {Fore.WHITE}white, {Fore.BLACK}black\n{Fore.LIGHTBLACK_EX}lightblack_ex, {Fore.LIGHTBLUE_EX}lightblue_ex, {Fore.LIGHTCYAN_EX}lightcyan_ex, {Fore.LIGHTGREEN_EX}lightgreen_ex\n{Fore.LIGHTMAGENTA_EX}lightmagenta_ex, {Fore.LIGHTRED_EX}lightred_ex, {Fore.LIGHTWHITE_EX}lightwhite_ex, {Fore.LIGHTYELLOW_EX}lightyellow_ex{reset()}\nYou cannot see some colors as your terminal's background color is set that way.")
+                print(f"Allowed definitions:\n{Fore.RED}red, {Fore.GREEN}green, {Fore.YELLOW}yellow, {Fore.LIGHTBLUE_EX}blue, {Fore.MAGENTA}magenta, {Fore.CYAN}cyan, {Fore.WHITE}white, {Fore.BLACK}black\n{Fore.LIGHTBLACK_EX}lightblack_ex, {Fore.LIGHTBLUE_EX}lightblue_ex, {Fore.LIGHTCYAN_EX}lightcyan_ex, {Fore.LIGHTGREEN_EX}lightgreen_ex\n{Fore.LIGHTMAGENTA_EX}lightmagenta_ex, {Fore.LIGHTRED_EX}lightred_ex, {Fore.LIGHTWHITE_EX}lightwhite_ex, {Fore.LIGHTYELLOW_EX}lightyellow_ex, {Fore.RESET}reset")
+                print("You may see some colors as your terminal's background color is set that way.")
                 exit(1)
             elif listarg[1].startswith("clr") and listarg[1].endswith("background"):
-                print(f"Allowed definitions:\n{Back.RED}red, {Back.GREEN}green, {Back.YELLOW}yellow, {Back.BLUE}blue, {Back.MAGENTA}magenta, {Back.CYAN}cyan, {Back.WHITE}white, {Back.BLACK}black\n{Back.LIGHTBLACK_EX}lightblack_ex, {Back.LIGHTBLUE_EX}lightblue_ex, {Back.LIGHTCYAN_EX}lightcyan_ex, {Back.LIGHTGREEN_EX}lightgreen_ex\n{Back.LIGHTMAGENTA_EX}lightmagenta_ex, {Back.LIGHTRED_EX}lightred_ex, {Back.LIGHTWHITE_EX}lightwhite_ex, {Back.LIGHTYELLOW_EX}lightyellow_ex{reset()}\nYou cannot see some colors as your terminal's background color is set that way.\n\nThe green color stretching from lightyellow_ex seems to be a bug that I can't fix.\nIf you find a fix, please make a PR.")
+                print(f"Allowed definitions:\n{Back.RED}red{reset()}, {Back.GREEN}green{reset()}, {Back.YELLOW}yellow{reset()}, {Back.BLUE}blue{reset()}, {Back.MAGENTA}magenta{reset()}, {Back.CYAN}cyan{reset()}, {Back.WHITE}white{reset()}, {Back.BLACK}black\n{Back.LIGHTBLACK_EX}lightblack_ex{reset()}, {Back.LIGHTBLUE_EX}lightblue_ex{reset()}, {Back.LIGHTCYAN_EX}lightcyan_ex{reset()}, {Back.LIGHTGREEN_EX}lightgreen_ex{reset()}\n{Back.LIGHTMAGENTA_EX}lightmagenta_ex{reset()}, {Back.LIGHTRED_EX}lightred_ex{reset()}, {Back.LIGHTWHITE_EX}lightwhite_ex{reset()}, {Back.LIGHTYELLOW_EX}lightyellow_ex{reset()}, {Back.RESET}reset")
+                print("You may see some colors as your terminal's background color is set that way.")
                 exit(1)
             elif listarg[1].startswith("clr") and listarg[1].endswith("style") and listarg[2].lower() in ["bright","normal","dim","reset_all"]:
                 config("set",listarg[1],listarg[2].lower())
             elif listarg[1].startswith("clr") and listarg[1].endswith("style"):
-                print(f"Allowed definitions: {Style.BRIGHT}BRIGHT, {Style.NORMAL}NORMAL, {Style.DIM}DIM, {Style.RESET_ALL}RESET_ALL")
+                print(f"Allowed definitions: {Style.BRIGHT}BRIGHT{reset()}, {Style.NORMAL}NORMAL{reset()}, {Style.DIM}DIM{reset()}, {Style.RESET_ALL}RESET_ALL")
                 exit(1)
             elif "env" in listarg[1]:
                 print(f"{Fore.RED}ConfigError: Cannot change env variables in config.json")
                 exit(1)
             elif listarg[1] == "default.ignore_dirs":
-                print(f"{Fore.RED}ConfigError: Cannot change `{Fore.BLUE}default.ignore_dirs{Fore.RED}` yet in config.json")
+                print(f"{Fore.RED}ConfigError: Cannot change `{Fore.LIGHTBLUE_EX}default.ignore_dirs{Fore.RED}` yet in config.json")
                 print("This feature is still in development.")
                 exit(1)
             else:
@@ -138,7 +162,7 @@ def configure(listarg):
         elif listarg[0] == "read":
             print(f"`{Fore.CYAN}{listarg[1]}{Fore.WHITE}` is set as {Fore.MAGENTA}{config('read',listarg[1])}")
             if listarg[1].startswith("clr") and listarg[1].endswith("foreground"):
-                print(f"Allowed definitions:\n{Fore.RED}red, {Fore.GREEN}green, {Fore.YELLOW}yellow, {Fore.BLUE}blue, {Fore.MAGENTA}magenta, {Fore.CYAN}cyan, {Fore.WHITE}white, {Fore.BLACK}black\n{Fore.LIGHTBLACK_EX}lightblack_ex, {Fore.LIGHTBLUE_EX}lightblue_ex, {Fore.LIGHTCYAN_EX}lightcyan_ex, {Fore.LIGHTGREEN_EX}lightgreen_ex\n{Fore.LIGHTMAGENTA_EX}lightmagenta_ex, {Fore.LIGHTRED_EX}lightred_ex, {Fore.LIGHTWHITE_EX}lightwhite_ex, {Fore.LIGHTYELLOW_EX}lightyellow_ex{reset()}\nYou cannot see some colors as your terminal's background color is set that way.")
+                print(f"Allowed definitions:\n{Fore.RED}red{reset()}, {Fore.GREEN}green{reset()}, {Fore.YELLOW}yellow{reset()}, {Fore.LIGHTBLUE_EX}blue{reset()}, {Fore.MAGENTA}magenta{reset()}, {Fore.CYAN}cyan{reset()}, {Fore.WHITE}white{reset()}, {Fore.BLACK}black\n{Fore.LIGHTBLACK_EX}lightblack_ex{reset()}, {Fore.LIGHTBLUE_EX}lightblue_ex{reset()}, {Fore.LIGHTCYAN_EX}lightcyan_ex{reset()}, {Fore.LIGHTGREEN_EX}lightgreen_ex\n{Fore.LIGHTMAGENTA_EX}lightmagenta_ex{reset()}, {Fore.LIGHTRED_EX}lightred_ex{reset()}, {Fore.LIGHTWHITE_EX}lightwhite_ex{reset()}, {Fore.LIGHTYELLOW_EX}lightyellow_ex{reset()}\nYou cannot see some colors as your terminal's background color is set that way.")
             elif listarg[1].startswith("clr") and listarg[1].endswith("background"):
                 print(f"Allowed definitions:\n{Back.RED}red, {Back.GREEN}green, {Back.YELLOW}yellow, {Back.BLUE}blue, {Back.MAGENTA}magenta, {Back.CYAN}cyan, {Back.WHITE}white, {Back.BLACK}black\n{Back.LIGHTBLACK_EX}lightblack_ex, {Back.LIGHTBLUE_EX}lightblue_ex, {Back.LIGHTCYAN_EX}lightcyan_ex, {Back.LIGHTGREEN_EX}lightgreen_ex\n{Back.LIGHTMAGENTA_EX}lightmagenta_ex, {Back.LIGHTRED_EX}lightred_ex, {Back.LIGHTWHITE_EX}lightwhite_ex, {Back.LIGHTYELLOW_EX}lightyellow_ex{reset()}\nYou cannot see some colors as your terminal's background color is set that way.\n\nThe green color stretching from lightyellow_ex seems to be a bug that I can't fix.\nIf you find a fix, please make a PR.")
             elif listarg[1].startswith("clr") and listarg[1].endswith("style"):
@@ -149,12 +173,14 @@ def configure(listarg):
                 print(f"Allowed definitions: Any integer above 0")
             exit(0)
         else:
-            print(f"{Fore.RED}FlagError: Expected {Fore.YELLOW}`list`{Fore.RED}, {Fore.YELLOW}`read`{Fore.RED}, {Fore.YELLOW}`set`{Fore.RED} or {Fore.YELLOW}`reset`{Fore.RED} after {Fore.YELLOW}`--config`{Fore.RED} but received {Fore.YELLOW}{listarg[0]}{Fore.RED}")
+            print(f"{Fore.RED}FlagError: Expected {Fore.YELLOW}`list`{Fore.RED}, {Fore.YELLOW}`read`{Fore.RED} or {Fore.YELLOW}`set`{Fore.RED} after {Fore.YELLOW}`--config`{Fore.RED} but received {Fore.YELLOW}{listarg[0]}{Fore.RED}")
             exit(1)
     except IndexError:
         if listarg[0] == "set":
-            print(f"{Fore.RED}FlagError: Expected value to set to `{listarg[1]}` but received None")
-            exit(1)
-        else:
-            print(f"{Fore.RED}FlagError: Expected {Fore.YELLOW}`list`{Fore.RED}, {Fore.YELLOW}`read`{Fore.RED}, {Fore.YELLOW}`set`{Fore.RED} or {Fore.YELLOW}`reset`{Fore.RED} after {Fore.YELLOW}`--config`{Fore.RED} but received {Fore.YELLOW}{listarg[0]}{Fore.RED}")
-            exit(1)
+            try:
+                print(f"{Fore.RED}FlagError: Expected value to set to {Back.LIGHTBLACK_EX}`{listarg[1]}`{Back.RESET} but received None")
+                exit(1)
+            except IndexError:
+                print(f"{Fore.RED}FlagError: Expected key but received None")
+        elif listarg[0] == "read":
+            print(f"{Fore.RED}FlagError: Expected key but received None")

@@ -84,13 +84,11 @@ def search_in_file(file_path, term, case_sensitive):
                 if i > last_printed_line:
                     if line_number - 1 == i:
                         line_marker = ">"
-                        clrs = [config("read", "clr.has_term.line_number",is_theme=True), config("read", "clr.has_term.line",is_theme=True)]
+                        clrs = [config("read", "clr.has_term.line_number", is_theme=True), config("read", "clr.has_term.line", is_theme=True)]
                         line = lines[i][:-1]
-                        # I need to make it case-insensitive but it's hard
-                        line = line.replace(term, f'{config("read", "clr.has_term.term",is_theme=True)}{term}{clrs[1]}')
                     else:
                         line_marker = " "
-                        clrs = [config("read", "clr.no_term.line_number",is_theme=True), config("read", "clr.no_term.line",is_theme=True)]
+                        clrs = [config("read", "clr.no_term.line_number", is_theme=True), config("read", "clr.no_term.line", is_theme=True)]
                         line = lines[i][:-1]
                     if term in lines[i] and i+1 < line_number or i+1 in printed_line_numbers:
                         pass
@@ -104,7 +102,7 @@ def main(namespace_arguments):
     global args
     args = namespace_arguments
     print()
-    if args.config:
+    if args.config != None:
         configure(args.config)
         exit(0)
     try:
@@ -112,7 +110,12 @@ def main(namespace_arguments):
             remote_url = "https://raw.githubusercontent.com/NSPC911/search/main/"
             import requests
             # Screw you, you are updating everything
-            response = requests.get(remote_url + "config.json")
+            try:
+                response = requests.get(remote_url + "config.json")
+            except requests.exceptions.ConnectionError:
+                print(f"{Fore.RED}ConnectionError: Max retries exceeded, likely due to no connection.")
+                print(f"{Fore.YELLOW}\tTurn off Flight Mode and connect to a WiFi, or restart your device.")
+                exit(1)
             if response.status_code == 200:
                 remote_config = response.json()
                 current_config = load_json(config_path)
@@ -187,15 +190,15 @@ def main(namespace_arguments):
     found = False
 
     if args.in_cwd:
-        print(f"{Fore.WHITE}Searching for {Fore.BLUE}{args.term} {Fore.WHITE}in {Fore.YELLOW}{os.getcwd()}")
+        print(f"{Fore.WHITE}Searching for {Fore.LIGHTBLUE_EX}{args.term} {Fore.WHITE}in {Fore.YELLOW}{os.getcwd()}")
         search_in_cwd(args.term, args.case_sensitive)
     else:
-        print(f"{Fore.WHITE}Searching for {Fore.BLUE}{args.term}")
+        print(f"{Fore.WHITE}Searching for {Fore.LIGHTBLUE_EX}{args.term}")
         search_dir(os.getcwd(), args.term, args.case_sensitive)
 
     if not found:
         clear_line()
-        print(f"\n{Fore.YELLOW}Couldn't find {Fore.BLUE}{args.term}")
+        print(f"\n{Fore.YELLOW}Couldn't find {Fore.LIGHTBLUE_EX}{args.term}")
     else:
         clear_line("-")
     print()
@@ -226,7 +229,7 @@ if __name__ == "__main__":
             parser.add_argument("--case-insensitive", "-ncs", action="store_true", default=False, help=f"Disable case-sensitive searching")
         else:
             parser.add_argument("--case-sensitive", "-cs", action="store_true", default=False, help=f"Enable case-sensitive searching")
-        parser.add_argument("--config", nargs=argparse.REMAINDER, metavar=('modifier', 'key', 'value'), help=f"Extra args: [{Fore.BLUE}set{Fore.WHITE}/{Fore.CYAN}read{Fore.WHITE}/where/list/reset] [{Fore.BLUE}key{Fore.WHITE}/{Fore.CYAN}key{Fore.WHITE}] [{Fore.BLUE}value{Fore.WHITE}]")
+        parser.add_argument("--config", nargs=argparse.REMAINDER, metavar=('modifier', 'key', 'value'), help=f"Extra args: [{Fore.LIGHTBLUE_EX}set{Fore.WHITE}/{Fore.CYAN}read{Fore.WHITE}/where/list/reset] [{Fore.LIGHTBLUE_EX}key{Fore.WHITE}/{Fore.CYAN}key{Fore.WHITE}] [{Fore.LIGHTBLUE_EX}value{Fore.WHITE}]")
         parser.add_argument("--update", "-u", action="store_true", help="Update files from remote")
         args = parser.parse_args()
         try:

@@ -1,13 +1,10 @@
 {
-    "clr.has_term.line_number.foreground": "blue",
+    "clr.has_term.line_number.foreground": "lightblue_ex",
     "clr.has_term.line_number.background": "reset",
     "clr.has_term.line_number.style": "normal",
-    "clr.has_term.line.foreground": "green",
+    "clr.has_term.line.foreground": "lightgreen_ex",
     "clr.has_term.line.background": "reset",
     "clr.has_term.line.style": "normal",
-    "clr.has_term.term.foreground": "lightgreen_ex",
-    "clr.has_term.term.background": "reset",
-    "clr.has_term.term.style": "bright",
     "clr.no_term.line_number.foreground": "cyan",
     "clr.no_term.line_number.background": "reset",
     "clr.no_term.line_number.style": "dim",
@@ -27,6 +24,62 @@
     "default.show_current": true,
     "updater.env.current_version": "1.0.4",
     "updater.canary": false,
-    "updater.env.canary_version": "1.0.5.6",
-    "updater.auto_update": false
+    "updater.env.canary_version": "1.0.5.7",
+    "updater.auto_update": false,
+    "config.env.colors": {
+        "comment": "These are the supported colors you can refer to",
+        "foregroud": [
+            "red",
+            "green",
+            "yellow",
+            "blue",
+            "magenta",
+            "cyan",
+            "white",
+            "black",
+            "lightblack_ex",
+            "lightblue_ex",
+            "lightcyan_ex",
+            "lightgreen_ex",
+            "lightmagenta_ex",
+            "lightred_ex",
+            "lightwhite_ex",
+            "lightyellow_ex",
+            "reset"
+        ],
+        "background": [
+            "red",
+            "green",
+            "yellow",
+            "blue",
+            "magenta",
+            "cyan",
+            "white",
+            "black",
+            "lightblack_ex",
+            "lightblue_ex",
+            "lightcyan_ex",
+            "lightgreen_ex",
+            "lightmagenta_ex",
+            "lightred_ex",
+            "lightwhite_ex",
+            "lightyellow_ex",
+            "reset"
+        ],
+        "style": [
+            "bright",
+            "normal",
+            "dim",
+            "reset_all"
+        ]
+    },
+    "config.env.type.boolean": [
+        "default.include_filename",
+        "default.search_content",
+        "default.in_cwd",
+        "default.case_sensitive",
+        "default.show_current",
+        "updater.canary",
+        "updater.auto_update"
+    ]
 }
