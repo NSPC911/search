@@ -120,7 +120,7 @@ def main(namespace_arguments):
                 remote_config = response.json()
                 current_config = load_json(config_path)
                 # Update Checker
-                if current_config["updater.canary"] and remote_config["updater.env.canary_version"] != current_config["updater.env.canary_version"]:
+                if current_config["updater.canary"] and ( remote_config["updater.env.canary_version"][0] > current_config["updater.env.canary_version"][0] or  remote_config["updater.env.canary_version"][1] > current_config["updater.env.canary_version"][1] or  remote_config["updater.env.canary_version"][2] > current_config["updater.env.canary_version"][2] or  remote_config["updater.env.canary_version"][3] > current_config["updater.env.canary_version"][3]):
                     print(f"{Fore.GREEN}New canary version found!")
                     # Get latest commit details (my commits are terrible)
                     ghapi_response = requests.get("https://api.github.com/repos/NSPC911/search/commits")
@@ -129,7 +129,7 @@ def main(namespace_arguments):
                         print(f"Latest commit:\n{Fore.CYAN}{commit_details['message']}")
                         print(f"Commit Hash: {Fore.LIGHTMAGENTA_EX}{commit_details['tree']['sha']}")
                     canary_current = "canary"
-                elif remote_config["updater.env.current_version"] != current_config["updater.env.current_version"]:
+                elif ( remote_config["updater.env.current_version"][0] > current_config["updater.env.current_version"][0] or remote_config["updater.env.current_version"][1] > current_config["updater.env.current_version"][1] or remote_config["updater.env.current_version"][2] > current_config["updater.env.current_version"][2] ):
                     print(f"{Fore.GREEN}New stable version found")
                     print(f"{Fore.YELLOW}Release notes: https://github.com/NSPC911/search/releases/tag/v{remote_config['updater.env.current_version']}")
                     canary_current = "current"
